@@ -11,6 +11,8 @@ shared:
 
 clean:
 	rm -f *.o
+	rm -f *test*
+	rm -f *merged*
 
 
 zad2:
