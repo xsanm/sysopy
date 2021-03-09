@@ -10,7 +10,6 @@ int main(int argc, char **argv) {
     struct block *table = NULL;
     struct pair *pairs = NULL;
     int blocks;
-    char *temp_file = NULL;
 
     if(argc <= 4) {
         puts("NOT ENOUGH ARGUMENTS");
@@ -53,16 +52,30 @@ int main(int argc, char **argv) {
 
     //TODO sprawdzic czy wgl mozna usunac
 
-    for(i; i < argc; i++) {
+    while(i < argc) {
         if(strcmp(argv[i], "remove_block") == 0) {
-           del_block(table, strtol(argv[i + 1], NULL, 10));
+            int block_id = strtol(argv[i + 1], NULL, 10);
+            if(block_id < 0 || block_id >= blocks) {
+                puts("WRONG BLOCK ID");
+            } else {
+                del_block(table, block_id);
+            }
            i++;
         } else if(strcmp(argv[i], "remove_row") == 0) {
-            del_row_from_block(table, strtol(argv[i + 1], NULL, 10), strtol(argv[i + 2], NULL, 10));
+            int block_id = strtol(argv[i + 1], NULL, 10);
+            int row_id = strtol(argv[i + 2], NULL, 10);
+            if(block_id < 0 || block_id >= blocks) {
+                puts("WRONG BLOCK ID");
+            } else if(row_id < 0 || row_id >= rows_in_block(table, block_id)){
+                puts("WRONG ROW ID");
+            } else {
+                del_row_from_block(table, block_id, row_id);
+            }
             i += 2;
         } else {
             puts("invalid instruction");
         }
+        i++;
     }
 
     display_table(table, blocks);

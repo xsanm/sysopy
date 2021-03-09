@@ -71,19 +71,6 @@ void merge(struct pair *pairs, int number_of_pairs) {
         fclose(fp_b);
         fclose(f);
     }
-
-    /*char buf[1000];
-    int nbytes;
-    int bytes_read;
-    int fd;
-
-    nbytes = sizeof(buf);
-    bytes_read = read(open("a.txt", O_RDONLY), buf, nbytes);
-
-    printf("%d %d \n", nbytes, bytes_read);
-    printf("%s", buf);*/
-
-
 }
 
 int add_block(struct block *main_arr, char *temp_file, int i) {
@@ -92,10 +79,15 @@ int add_block(struct block *main_arr, char *temp_file, int i) {
     FILE *f = fopen(temp_file, "r");
     
     char **rows = calloc(1024, sizeof(char *));
+    
+    for(int i = 0; i < 1024; i++) {
+        rows[i] = NULL;
+    }
 
     while(getline(&rows[lines], &len, f) != -1) {
         lines++;
     }
+
     
     main_arr[i].rows = rows;
     main_arr[i].number_of_rows = lines;
@@ -110,18 +102,26 @@ int rows_in_block(struct block *main_arr, int id) {
 }
 
 void del_block(struct block *main_arr, int id) {
-    free(&main_arr[id]);
+    free(main_arr[id].rows);
+    main_arr[id].rows = NULL;
 }
 
 void del_row_from_block(struct block *main_arr, int block_id, int row_id) {
     free(main_arr[block_id].rows[row_id]);
+    main_arr[block_id].rows[row_id] = NULL;
 }
 
 void display_table(struct block *main_arr, int blocks) {
     for(int i = 0; i < blocks; i++) {
         printf("### BLOCK NR %d:\n", i);
+        if(main_arr[i].rows == NULL) {
+            puts("DELETED");
+            continue;
+        }
+        
         for(int j = 0; j < main_arr[i].number_of_rows; j++) {
-            printf("%s", main_arr[i].rows[j]);
+            if(main_arr[i].rows[j] != NULL) printf("%s", main_arr[i].rows[j]);
+            else puts("DELETED");
         }
     }
 }
