@@ -1,11 +1,127 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/times.h>
+#include <time.h>
+#include <unistd.h>
+
 #include "lib.h"
 
+double calculate_time_clocks(clock_t start, clock_t end) {
+    return (double) (end - start) / CLOCKS_PER_SEC;
+}
 
+double calculate_time_tics(clock_t start, clock_t end) {
+    return (double) (end - start) / sysconf(_SC_CLK_TCK);
+}
+
+char *generate_random_line() {
+    const int SIZE = 16;
+    char *base = "ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
+    size_t base_len = strlen(base);
+
+    char *res = (char *) malloc(SIZE * sizeof(char));
+
+    for (int i = 0; i < SIZE - 1; i++) {
+        res[i] = base[rand() % base_len];
+    }
+    res[SIZE - 2] = '\n';
+    res[SIZE - 1] = '\0';
+    return res;
+}
+
+void generate_file(char *f_name, int rows_number) {
+    FILE *f = fopen(f_name, "w+");
+    for(int i = 0; i < rows_number; i++) {
+        fprintf(f, "%s", generate_random_line());
+    }
+    fclose(f);
+}
+
+void run_time_test(int blocks, int rows_number) {
+    struct tms operation_time[8]; //usr and sys
+    clock_t operation_time_real[8]; //real
+
+    struct block *table = create_blocks(blocks);
+    struct pair *pairs = create_pairs(blocks);
+
+    for(int i = 0; i < blocks; i++) {
+        char f_name[32] = "a_test_";
+        char nr[16];
+        sprintf(nr, "%d", i);
+        strcat(f_name, nr);
+        strcat(f_name, ".txt");
+        
+        generate_file(f_name, rows_number);
+        pairs[i].a_adress = malloc(strlen(f_name) * sizeof(char));
+        strcpy(pairs[i].a_adress, f_name);
+
+        f_name[0] = 'b';
+        generate_file(f_name, rows_number);
+        pairs[i].b_adress = malloc(strlen(f_name) * sizeof(char));
+        strcpy(pairs[i].b_adress, f_name);
+    }
+
+    times(&operation_time[0]);
+    operation_time_real[0] = clock();
+
+    merge(pairs, blocks);
+
+    times(&operation_time[1]);
+    operation_time_real[1] = clock();
+
+    for(int j = 0; j < blocks; j++) {
+        add_block(table, pairs[j].merged_adress, j);
+    }
+
+    times(&operation_time[2]);
+    operation_time_real[2] = clock();
+
+    for(int j = 0; j < blocks; j++) {
+        del_block(table, j);
+    }
+
+    times(&operation_time[3]);
+    operation_time_real[3] = clock();
+
+    for(int k = 0; k <= 100; k++) {
+        for(int j = 0; j < blocks; j++) {
+            add_block(table, pairs[j].merged_adress, j);
+        }
+        for(int j = 0; j < blocks; j++) {
+            del_block(table, j);
+        }   
+    }
+    times(&operation_time[4]);
+    operation_time_real[4] = clock();
+
+    puts("              REAl        USER        SYSTEM");
+    printf("MERGE       %lf", calculate_time_clocks(operation_time_real[0], operation_time_real[1]));
+    printf("    %lf", calculate_time_tics(operation_time[0].tms_utime, operation_time[1].tms_utime));
+    printf("    %lf\n", calculate_time_tics(operation_time[0].tms_stime, operation_time[1].tms_stime));
+
+    printf("SAVE        %lf", calculate_time_clocks(operation_time_real[1], operation_time_real[2]));
+    printf("    %lf", calculate_time_tics(operation_time[1].tms_utime, operation_time[2].tms_utime));
+    printf("    %lf\n", calculate_time_tics(operation_time[1].tms_stime, operation_time[2].tms_stime));
+
+    printf("DEL         %lf", calculate_time_clocks(operation_time_real[2], operation_time_real[3]));
+    printf("    %lf", calculate_time_tics(operation_time[2].tms_utime, operation_time[3].tms_utime));
+    printf("    %lf\n", calculate_time_tics(operation_time[2].tms_stime, operation_time[3].tms_stime));
+
+    printf("SAVE-DEL    %lf", calculate_time_clocks(operation_time_real[3], operation_time_real[4]));
+    printf("    %lf", calculate_time_tics(operation_time[3].tms_utime, operation_time[4].tms_utime));
+    printf("    %lf\n", calculate_time_tics(operation_time[3].tms_stime, operation_time[4].tms_stime));
+
+}
 
 int main(int argc, char **argv) {
+    srand((unsigned int) time(NULL));
+
+
+    struct tms operation_time[8];
+    clock_t operation_time_real[8];
+    times(&operation_time[0]);
+    operation_time_real[0] = clock();
 
     struct block *table = NULL;
     struct pair *pairs = NULL;
@@ -49,9 +165,6 @@ int main(int argc, char **argv) {
 
     display_table(table, blocks);
 
-
-    //TODO sprawdzic czy wgl mozna usunac
-
     while(i < argc) {
         if(strcmp(argv[i], "remove_block") == 0) {
             int block_id = strtol(argv[i + 1], NULL, 10);
@@ -78,7 +191,34 @@ int main(int argc, char **argv) {
         i++;
     }
 
+    for(int k = 0; k < 100000; k++) {
+        for(int j = 0; j < blocks; j++) {
+            del_block(table, j);
+        }
+        for(int j = 0; j < blocks; j++) {
+            add_block(table, pairs[j].merged_adress, j);
+        }
+    }
+
     display_table(table, blocks);
+    times(&operation_time[1]);
+    operation_time_real[1] = clock();
+    //run_time_test();
+    printf("%f\n", calculate_time_tics(operation_time[0].tms_utime, operation_time[1].tms_utime));
+    printf("%f\n", calculate_time_tics(operation_time[0].tms_stime, operation_time[1].tms_stime));
+    printf("%f\n", calculate_time_clocks(operation_time_real[0], operation_time_real[1]));
+
+    puts("\n### SMALL TESTS ### ");
+    puts("5 FILES, 10 ROWS");
+    run_time_test(5, 10);
+
+    puts("\n### MEDIUM TESTS ### ");
+    puts("100 FILES, 200 ROWS");
+    run_time_test(100, 200);
+
+    puts("\n### LARGE TESTS ### ");
+    puts("1000 FILES, 400 ROWS");
+    //run_time_test(1000, 400);
 
     return 0;
 }

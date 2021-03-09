@@ -24,7 +24,6 @@ struct pair *create_pairs(int number_of_pairs) {
 }
 
 void merge(struct pair *pairs, int number_of_pairs) {
-
     for(int i = 0; i < number_of_pairs; i++) {
         FILE * fp_a = fopen(pairs[i].a_adress, "r");
         FILE * fp_b = fopen(pairs[i].b_adress, "r");
@@ -43,10 +42,7 @@ void merge(struct pair *pairs, int number_of_pairs) {
         pairs[i].merged_adress = malloc(strlen(merged_name) * sizeof(char));
         strcpy(pairs[i].merged_adress, merged_name);
 
-        //printf("Merged file: %s\n", merged_name);
-
         FILE *f = fopen(merged_name, "w+");
-
         char * line = NULL;
         size_t len = 0;
         int a = 1, b = 1;
@@ -77,9 +73,7 @@ int add_block(struct block *main_arr, char *temp_file, int i) {
     int lines = 0;
     size_t len = 0;
     FILE *f = fopen(temp_file, "r");
-    
     char **rows = calloc(1024, sizeof(char *));
-    
     for(int i = 0; i < 1024; i++) {
         rows[i] = NULL;
     }
@@ -88,7 +82,6 @@ int add_block(struct block *main_arr, char *temp_file, int i) {
         lines++;
     }
 
-    
     main_arr[i].rows = rows;
     main_arr[i].number_of_rows = lines;
 
@@ -118,7 +111,6 @@ void display_table(struct block *main_arr, int blocks) {
             puts("DELETED");
             continue;
         }
-        
         for(int j = 0; j < main_arr[i].number_of_rows; j++) {
             if(main_arr[i].rows[j] != NULL) printf("%s", main_arr[i].rows[j]);
             else puts("DELETED");
