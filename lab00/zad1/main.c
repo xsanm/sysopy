@@ -20,13 +20,13 @@ double calculate_time_tics(clock_t start, clock_t end) {
 }
 
 char *generate_random_line() {
-    const int SIZE = 16;
-    char *base = "ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
+    const int SIZE = (rand() % 16) + 16;
+    char *base = "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz";
     size_t base_len = strlen(base);
 
     char *res = (char *) malloc(SIZE * sizeof(char));
 
-    for (int i = 0; i < SIZE - 1; i++) {
+    for (int i = 0; i < SIZE - 2; i++) {
         res[i] = base[rand() % base_len];
     }
     res[SIZE - 2] = '\n';
@@ -57,12 +57,12 @@ void run_time_test(int blocks, int rows_number) {
         strcat(f_name, ".txt");
         
         generate_file(f_name, rows_number);
-        pairs[i].a_adress = malloc(strlen(f_name) * sizeof(char));
+        pairs[i].a_adress = calloc(strlen(f_name), sizeof(char));
         strcpy(pairs[i].a_adress, f_name);
 
         f_name[0] = 'b';
         generate_file(f_name, rows_number);
-        pairs[i].b_adress = malloc(strlen(f_name) * sizeof(char));
+        pairs[i].b_adress = calloc(strlen(f_name), sizeof(char));
         strcpy(pairs[i].b_adress, f_name);
     }
 
@@ -122,29 +122,37 @@ int main(int argc, char **argv) {
     srand((unsigned int) time(NULL));
 
     if(argc >= 2 && strcmp(argv[1], "tests") == 0) {
-        puts("\n### SMALL TESTS ### ");
+        puts("\n### SMALL TESTS V1 ### ");
         puts("5 FILES, 10 ROWS");
         run_time_test(5, 10);
 
-        puts("\n### MEDIUM TESTS ### ");
-        puts("100 FILES, 200 ROWS");
-        run_time_test(100, 200);
+        puts("\n### SMALL TESTS V2 ### ");
+        puts("5 FILES, 100 ROWS");
+        run_time_test(5, 100);
 
-        puts("\n### LARGE TESTS ### ");
-        puts("1000 FILES, 400 ROWS");
-        run_time_test(1000, 400);
+        puts("\n### MEDIUM TESTS V1 ### ");
+        puts("200 FILES, 100 ROWS");
+        run_time_test(200, 100);
 
+        puts("\n### MEDIUM TESTS V2 ### ");
+        puts("200 FILES, 400 ROWS");
+        run_time_test(200, 400);
+
+        puts("\n### LARGE TESTS V1 ### ");
+        puts("1000 FILES, 100 ROWS");
+        run_time_test(1000, 100);
+
+        puts("\n### LARGE TESTS V2 ### ");
+        puts("1000 FILES, 600 ROWS");
+        run_time_test(1000, 600);
+    
         return 0;
     }
 
-    //struct tms operation_time[8];
-    //clock_t operation_time_real[8];
-    //times(&operation_time[0]);
-    //operation_time_real[0] = clock();
-
     struct block *table = NULL;
-    struct pair *pairs = NULL;
     int blocks;
+    struct pair *pairs = NULL;
+    
 
     if(argc <= 4) {
         puts("NOT ENOUGH ARGUMENTS");
@@ -166,12 +174,13 @@ int main(int argc, char **argv) {
     for(int j = 0; j < blocks; j++) {
         char *pair = argv[i++];
         int position = (int)(strchr(pair, ':') - pair);
+        
+        pairs[j].a_adress =  calloc((position + 1), sizeof(char));
+        pairs[j].b_adress =  calloc((strlen(pair) - position + 1), sizeof(char));
+        sscanf(pair, "%[^:]:%s", pairs[j].a_adress, pairs[j].b_adress);
 
-        pairs[j].a_adress = (char*) malloc((position + 1) * sizeof(char));
-        pairs[j].b_adress = (char*) malloc((strlen(pair) - position + 1) * sizeof(char));
-
-        strncpy(pairs[j].a_adress, pair, position);
-        strncpy(pairs[j].b_adress, pair + position + 1, (strlen(pair) - position));
+        //strncpy(pairs[j].a_adress, pair, position);
+        //strncpy(pairs[j].b_adress, pair + position + 1, (strlen(pair) - position));
     }
 
     //display_pairs(pairs, blocks);
@@ -214,5 +223,6 @@ int main(int argc, char **argv) {
     puts("\n### FINAL BLOCKS ###");
     display_table(table, blocks);
     puts("");
+    
     return 0;
 }

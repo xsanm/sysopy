@@ -17,9 +17,9 @@ struct block *create_blocks(int number_of_blocks);
 
 struct pair *create_pairs(int number_of_pairs);
 
-void merge(struct pair *pairs, int number_of_pairs); //returns name of temp file
+void merge(struct pair *pairs, int number_of_pairs); 
 
-int add_block(struct block *main_arr, char *temp_file, int i, int rows_num); //returns id in main arr
+int add_block(struct block *main_arr, char *temp_file, int i, int rows_num);
 
 int rows_in_block(struct block *main_arr, int id);
 
@@ -33,4 +33,4 @@ void display_pairs(struct pair *pairs, int number_of_pairs);
 
 
 
-#endif //_LIB_H
+#endif 

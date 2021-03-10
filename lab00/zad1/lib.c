@@ -35,10 +35,8 @@ void merge(struct pair *pairs, int number_of_pairs) {
         }
 
         char merged_name[16] = "merged";
-        char nr[4];
-        
+        char nr[6];
         sprintf(nr, "%d", i);
-       
         strcat(merged_name, nr);
         strcat(merged_name, ".txt");
         pairs[i].merged_adress = malloc(strlen(merged_name) * sizeof(char));
