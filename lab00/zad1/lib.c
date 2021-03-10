@@ -1,8 +1,10 @@
-#include <stdio.h>
+#define  _POSIX_C_SOURCE 200809L
+
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdio.h>
 
 #include "lib.h"
 
@@ -113,7 +115,7 @@ void del_row_from_block(struct block *main_arr, int block_id, int row_id) {
 
 void display_table(struct block *main_arr, int blocks) {
     for(int i = 0; i < blocks; i++) {
-        printf("### BLOCK NR %d:\n", i);
+        printf("\nBLOCK NR %d:\n", i);
         if(main_arr[i].rows == NULL) {
             puts("DELETED");
             continue;

@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "times.h": "c",
-        "lib.h": "c"
+        "lib.h": "c",
+        "dlfcn.h": "c"
     }
 }

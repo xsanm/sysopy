@@ -1,4 +1,4 @@
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/times.h>
@@ -7,9 +7,19 @@
 #include <dlfcn.h>
 
 #define  _GNU_SOURCE
-#include <stdio.h>
 
 #include "lib.h"
+void *dl_handle;
+
+struct block *(*dl_create_blocks)();
+struct pair *(*dl_create_pairs)();
+void (*dl_merge)();
+int (*dl_add_block)();
+int (*dl_rows_in_block)();
+void (*dl_del_block)();
+void (*dl_del_row_from_block)();
+void (*dl_display_table)();
+void (*dl_display_pairs)();
 
 double calculate_time_clocks(clock_t start, clock_t end) {
     return (double) (end - start) / CLOCKS_PER_SEC;
@@ -46,8 +56,8 @@ void run_time_test(int blocks, int rows_number) {
     struct tms operation_time[8]; //usr and sys
     clock_t operation_time_real[8]; //real
 
-    struct block *table = create_blocks(blocks);
-    struct pair *pairs = create_pairs(blocks);
+    struct block *table = dl_create_blocks(blocks);
+    struct pair *pairs = dl_create_pairs(blocks);
 
     for(int i = 0; i < blocks; i++) {
         char f_name[32] = "a_test_";
@@ -69,20 +79,20 @@ void run_time_test(int blocks, int rows_number) {
     times(&operation_time[0]);
     operation_time_real[0] = clock();
 
-    merge(pairs, blocks);
+    dl_merge(pairs, blocks);
 
     times(&operation_time[1]);
     operation_time_real[1] = clock();
 
     for(int j = 0; j < blocks; j++) {
-        add_block(table, pairs[j].merged_adress, j, pairs[j].rows);
+        dl_add_block(table, pairs[j].merged_adress, j, pairs[j].rows);
     }
 
     times(&operation_time[2]);
     operation_time_real[2] = clock();
 
     for(int j = 0; j < blocks; j++) {
-        del_block(table, j);
+        dl_del_block(table, j);
     }
 
     times(&operation_time[3]);
@@ -90,10 +100,10 @@ void run_time_test(int blocks, int rows_number) {
 
     for(int k = 0; k <= 10; k++) {
         for(int j = 0; j < blocks; j++) {
-            add_block(table, pairs[j].merged_adress, j, pairs[j].rows);
+            dl_add_block(table, pairs[j].merged_adress, j, pairs[j].rows);
         }
         for(int j = 0; j < blocks; j++) {
-            del_block(table, j);
+            dl_del_block(table, j);
         }   
     }
     times(&operation_time[4]);
@@ -119,6 +129,25 @@ void run_time_test(int blocks, int rows_number) {
 }
 
 int main(int argc, char **argv) {
+    
+    dl_handle = dlopen("./lib_shared.so", RTLD_LAZY);
+    if(dl_handle == NULL){
+        printf("Cannot find library");
+        return -1;
+    }
+
+    dl_create_blocks = dlsym(dl_handle, "create_blocks");
+    dl_create_pairs = dlsym(dl_handle, "create_pairs");
+    dl_merge = dlsym(dl_handle, "merge");
+    dl_add_block = dlsym(dl_handle, "add_block");
+    dl_rows_in_block = dlsym(dl_handle, "rows_in_block");
+    dl_del_block = dlsym(dl_handle, "del_block");
+    dl_del_row_from_block = dlsym(dl_handle, "del_row_from_block");
+    dl_display_table = dlsym(dl_handle, "display_table");
+    dl_display_pairs = dlsym(dl_handle, "display_pairs");
+    
+
+
     srand((unsigned int) time(NULL));
 
     if(argc >= 2 && strcmp(argv[1], "tests") == 0) {
@@ -159,8 +188,8 @@ int main(int argc, char **argv) {
 
     blocks = strtol(argv[2], NULL, 10);
 
-    table = create_blocks(blocks);
-    pairs = create_pairs(blocks);
+    table = dl_create_blocks(blocks);
+    pairs = dl_create_pairs(blocks);
     
     int i = 4;
     for(int j = 0; j < blocks; j++) {
@@ -176,14 +205,14 @@ int main(int argc, char **argv) {
 
     //display_pairs(pairs, blocks);
 
-    merge(pairs, blocks);
+    dl_merge(pairs, blocks);
 
     for(int j = 0; j < blocks; j++) {
-        add_block(table, pairs[j].merged_adress, j, pairs[j].rows);
+        dl_add_block(table, pairs[j].merged_adress, j, pairs[j].rows);
     }
 
-    puts("\n### INITAL BLOCKS ###");
-    display_table(table, blocks);
+
+    dl_display_table(table, blocks);
 
     while(i < argc) {
         if(strcmp(argv[i], "remove_block") == 0) {
@@ -191,7 +220,7 @@ int main(int argc, char **argv) {
             if(block_id < 0 || block_id >= blocks) {
                 puts("WRONG BLOCK ID");
             } else {
-                del_block(table, block_id);
+                dl_del_block(table, block_id);
             }
            i++;
         } else if(strcmp(argv[i], "remove_row") == 0) {
@@ -199,10 +228,10 @@ int main(int argc, char **argv) {
             int row_id = strtol(argv[i + 2], NULL, 10);
             if(block_id < 0 || block_id >= blocks) {
                 puts("WRONG BLOCK ID");
-            } else if(row_id < 0 || row_id >= rows_in_block(table, block_id)){
+            } else if(row_id < 0 || row_id >= dl_rows_in_block(table, block_id)){
                 puts("WRONG ROW ID");
             } else {
-                del_row_from_block(table, block_id, row_id);
+                dl_del_row_from_block(table, block_id, row_id);
             }
             i += 2;
         } else {
@@ -210,9 +239,7 @@ int main(int argc, char **argv) {
         }
         i++;
     }
-
-    puts("\n### FINAL BLOCKS ###");
-    display_table(table, blocks);
-    puts("");
+    dl_display_table(table, blocks);
+    
     return 0;
 }
