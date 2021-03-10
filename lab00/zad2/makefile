@@ -23,20 +23,10 @@ zad2_display: clean static
 	make display
 	make clean
 
-zad2_static: clean static
+zad2_tests: clean static
 	$(CC) $(CFLAGS) -c main.c -o test.o
 	$(CC) $(CFLAGS) -static test.o -L. lib.a -o test
-	./test tests
-	make clean
-
-zad2_shared: clean shared
-	$(CC) $(CFLAGS) -o test main.c lib_shared.so -L. -Wl,-rpath=.
-	./test tests
-	make clean
-
-zad2_dynamic: clean shared
-	$(CC) $(CFLAGS) -o test main_dynamic.c -ldl
-	./test tests
+	./test tests > raport2.txt
 	make clean
 
 display: 
