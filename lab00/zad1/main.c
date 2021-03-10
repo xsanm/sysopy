@@ -4,6 +4,7 @@
 #include <sys/times.h>
 #include <time.h>
 #include <unistd.h>
+#include <dlfcn.h>
 
 #include "lib.h"
 
@@ -71,7 +72,7 @@ void run_time_test(int blocks, int rows_number) {
     operation_time_real[1] = clock();
 
     for(int j = 0; j < blocks; j++) {
-        add_block(table, pairs[j].merged_adress, j);
+        add_block(table, pairs[j].merged_adress, j, pairs[j].rows);
     }
 
     times(&operation_time[2]);
@@ -84,9 +85,9 @@ void run_time_test(int blocks, int rows_number) {
     times(&operation_time[3]);
     operation_time_real[3] = clock();
 
-    for(int k = 0; k <= 100; k++) {
+    for(int k = 0; k <= 10; k++) {
         for(int j = 0; j < blocks; j++) {
-            add_block(table, pairs[j].merged_adress, j);
+            add_block(table, pairs[j].merged_adress, j, pairs[j].rows);
         }
         for(int j = 0; j < blocks; j++) {
             del_block(table, j);
@@ -117,6 +118,21 @@ void run_time_test(int blocks, int rows_number) {
 int main(int argc, char **argv) {
     srand((unsigned int) time(NULL));
 
+    if(argc >= 2 && strcmp(argv[1], "tests") == 0) {
+        puts("\n### SMALL TESTS ### ");
+        puts("5 FILES, 10 ROWS");
+        run_time_test(5, 10);
+
+        puts("\n### MEDIUM TESTS ### ");
+        puts("100 FILES, 200 ROWS");
+        run_time_test(100, 200);
+
+        puts("\n### LARGE TESTS ### ");
+        puts("1000 FILES, 400 ROWS");
+        run_time_test(1000, 400);
+
+        return 0;
+    }
 
     struct tms operation_time[8];
     clock_t operation_time_real[8];
@@ -155,13 +171,14 @@ int main(int argc, char **argv) {
         strncpy(pairs[j].b_adress, pair + position + 1, (strlen(pair) - position));
     }
 
-    display_pairs(pairs, blocks);
+    //display_pairs(pairs, blocks);
 
     merge(pairs, blocks);
 
     for(int j = 0; j < blocks; j++) {
-        add_block(table, pairs[j].merged_adress, j);
+        add_block(table, pairs[j].merged_adress, j, pairs[j].rows);
     }
+
 
     display_table(table, blocks);
 
@@ -190,35 +207,7 @@ int main(int argc, char **argv) {
         }
         i++;
     }
-
-    for(int k = 0; k < 100000; k++) {
-        for(int j = 0; j < blocks; j++) {
-            del_block(table, j);
-        }
-        for(int j = 0; j < blocks; j++) {
-            add_block(table, pairs[j].merged_adress, j);
-        }
-    }
-
     display_table(table, blocks);
-    times(&operation_time[1]);
-    operation_time_real[1] = clock();
-    //run_time_test();
-    printf("%f\n", calculate_time_tics(operation_time[0].tms_utime, operation_time[1].tms_utime));
-    printf("%f\n", calculate_time_tics(operation_time[0].tms_stime, operation_time[1].tms_stime));
-    printf("%f\n", calculate_time_clocks(operation_time_real[0], operation_time_real[1]));
-
-    puts("\n### SMALL TESTS ### ");
-    puts("5 FILES, 10 ROWS");
-    run_time_test(5, 10);
-
-    puts("\n### MEDIUM TESTS ### ");
-    puts("100 FILES, 200 ROWS");
-    run_time_test(100, 200);
-
-    puts("\n### LARGE TESTS ### ");
-    puts("1000 FILES, 400 ROWS");
-    //run_time_test(1000, 400);
-
+    
     return 0;
 }

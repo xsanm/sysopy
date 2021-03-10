@@ -46,10 +46,12 @@ void merge(struct pair *pairs, int number_of_pairs) {
         char * line = NULL;
         size_t len = 0;
         int a = 1, b = 1;
+        int rows = 0;
         while(a || b) {
             if(a) {
                 if(getline(&line, &len, fp_a) != -1) {
                     fprintf(f, "%s", line);
+                    rows++;
                 } else {
                     a = 0;
                 }
@@ -57,11 +59,13 @@ void merge(struct pair *pairs, int number_of_pairs) {
             if(b) {
                 if(getline(&line, &len, fp_b) != -1) {
                     fprintf(f, "%s", line);
+                    rows++;
                 } else {
                     b = 0;
                 }
             }
         }
+        pairs[i].rows = rows;
         
         fclose(fp_a);
         fclose(fp_b);
@@ -69,12 +73,12 @@ void merge(struct pair *pairs, int number_of_pairs) {
     }
 }
 
-int add_block(struct block *main_arr, char *temp_file, int i) {
+int add_block(struct block *main_arr, char *temp_file, int i, int rows_num) {
     int lines = 0;
     size_t len = 0;
     FILE *f = fopen(temp_file, "r");
-    char **rows = calloc(1024, sizeof(char *));
-    for(int i = 0; i < 1024; i++) {
+    char **rows = calloc(rows_num, sizeof(char *));
+    for(int i = 0; i < rows_num; i++) {
         rows[i] = NULL;
     }
 
@@ -86,7 +90,6 @@ int add_block(struct block *main_arr, char *temp_file, int i) {
     main_arr[i].number_of_rows = lines;
 
     fclose(f);
-
     return i;
 }
 
@@ -95,6 +98,10 @@ int rows_in_block(struct block *main_arr, int id) {
 }
 
 void del_block(struct block *main_arr, int id) {
+    for(int i = 0; i < main_arr[id].number_of_rows; i++) {
+        free(main_arr[id].rows[i]);
+        main_arr[id].rows[i] = NULL;
+    }
     free(main_arr[id].rows);
     main_arr[id].rows = NULL;
 }
