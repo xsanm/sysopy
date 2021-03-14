@@ -34,23 +34,20 @@ void merge(struct pair *pairs, int number_of_pairs) {
             return;
         }
 
-        char merged_name[16] = "merged";
-        char nr[6];
-        sprintf(nr, "%d", i);
-        strcat(merged_name, nr);
-        strcat(merged_name, ".txt");
-        pairs[i].merged_adress = malloc(strlen(merged_name) * sizeof(char));
-        strcpy(pairs[i].merged_adress, merged_name);
+        pairs[i].tmp = tmpfile();
 
-        FILE *f = fopen(merged_name, "w+");
         char * line = NULL;
         size_t len = 0;
         int a = 1, b = 1;
         int rows = 0;
         while(a || b) {
+            if(pairs[i].tmp == NULL) break;
             if(a) {
                 if(getline(&line, &len, fp_a) != -1) {
-                    fprintf(f, "%s", line);
+                    fprintf(pairs[i].tmp, "%s", line);
+                    free(line);
+                    line = NULL;
+                    len = 0;
                     rows++;
                 } else {
                     a = 0;
@@ -58,7 +55,10 @@ void merge(struct pair *pairs, int number_of_pairs) {
             }
             if(b) {
                 if(getline(&line, &len, fp_b) != -1) {
-                    fprintf(f, "%s", line);
+                    fprintf(pairs[i].tmp, "%s", line);
+                    free(line);
+                    line = NULL;
+                    len = 0;
                     rows++;
                 } else {
                     b = 0;
@@ -66,31 +66,28 @@ void merge(struct pair *pairs, int number_of_pairs) {
             }
         }
         pairs[i].rows = rows;
-        
+    
         fclose(fp_a);
         fclose(fp_b);
-        fclose(f);
     }
 }
 
-int add_block(struct block *main_arr, char *temp_file, int i, int rows_num) {
+int add_block(struct block *main_arr, FILE* tmp, int id, int rows_num) {
     int lines = 0;
     size_t len = 0;
-    FILE *f = fopen(temp_file, "r");
     char **rows = calloc(rows_num, sizeof(char *));
-    for(int i = 0; i < rows_num; i++) {
-        rows[i] = NULL;
-    }
+    for(int i = 0; i < rows_num; i++) rows[i] = NULL;
 
-    while(getline(&rows[lines], &len, f) != -1) {
+    rewind(tmp);
+
+    while(getline(&rows[lines], &len, tmp) != -1) {
         lines++;
     }
 
-    main_arr[i].rows = rows;
-    main_arr[i].number_of_rows = lines;
+    main_arr[id].rows = rows;
+    main_arr[id].number_of_rows = lines;
 
-    fclose(f);
-    return i;
+    return id;
 }
 
 int rows_in_block(struct block *main_arr, int id) {
@@ -98,6 +95,7 @@ int rows_in_block(struct block *main_arr, int id) {
 }
 
 void del_block(struct block *main_arr, int id) {
+    if(main_arr[id].rows == NULL) return;
     for(int i = 0; i < main_arr[id].number_of_rows; i++) {
         free(main_arr[id].rows[i]);
         main_arr[id].rows[i] = NULL;
@@ -107,6 +105,7 @@ void del_block(struct block *main_arr, int id) {
 }
 
 void del_row_from_block(struct block *main_arr, int block_id, int row_id) {
+    if(main_arr[block_id].rows == NULL || main_arr[block_id].number_of_rows <= row_id) return;
     free(main_arr[block_id].rows[row_id]);
     main_arr[block_id].rows[row_id] = NULL;
 }

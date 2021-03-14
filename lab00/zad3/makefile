@@ -1,5 +1,5 @@
 CC = gcc 
-CFLAGS = -Wall -O0 -std=c11
+CFLAGS = -Wall -Wextra -O0 -std=c11
 
 raport_file_a = results3a.txt
 raport_file_b = results3b.txt
@@ -13,11 +13,7 @@ shared:
 
 
 clean:
-	rm -f *.o
-	rm -f *.a
-	rm -f *.so
-	rm -f *test*
-	rm -f *merged*
+	rm -f *.o *test* *.a *.so
 
 
 zad3_display: clean static

@@ -1,5 +1,5 @@
 CC = gcc 
-CFLAGS = -Wall -O0 -std=c11
+CFLAGS = -Wall -Wextra -O0 -std=c11 -g
 
 static:
 	$(CC) $(CFLAGS) -c lib.c -o lib.o

@@ -53,8 +53,8 @@ void generate_file(char *f_name, int rows_number) {
 }
 
 void run_time_test(int blocks, int rows_number) {
-    struct tms operation_time[8]; //usr and sys
-    clock_t operation_time_real[8]; //real
+    struct tms operation_time[5]; //usr and sys
+    clock_t operation_time_real[5]; //real
 
     struct block *table = dl_create_blocks(blocks);
     struct pair *pairs = dl_create_pairs(blocks);
@@ -85,7 +85,7 @@ void run_time_test(int blocks, int rows_number) {
     operation_time_real[1] = clock();
 
     for(int j = 0; j < blocks; j++) {
-        dl_add_block(table, pairs[j].merged_adress, j, pairs[j].rows);
+        dl_add_block(table, pairs[j].tmp, j, pairs[j].rows);
     }
 
     times(&operation_time[2]);
@@ -100,7 +100,7 @@ void run_time_test(int blocks, int rows_number) {
 
     for(int k = 0; k <= 10; k++) {
         for(int j = 0; j < blocks; j++) {
-            dl_add_block(table, pairs[j].merged_adress, j, pairs[j].rows);
+            dl_add_block(table, pairs[j].tmp, j, pairs[j].rows);
         }
         for(int j = 0; j < blocks; j++) {
             dl_del_block(table, j);
@@ -126,6 +126,11 @@ void run_time_test(int blocks, int rows_number) {
     printf("    %lf", calculate_time_tics(operation_time[3].tms_utime, operation_time[4].tms_utime));
     printf("    %lf\n", calculate_time_tics(operation_time[3].tms_stime, operation_time[4].tms_stime));
 
+    for(int i = 0; i < blocks; i++) {
+        fclose(pairs[i].tmp);
+    }
+    free(table);
+    free(pairs);
 }
 
 int main(int argc, char **argv) {
@@ -174,14 +179,9 @@ int main(int argc, char **argv) {
         puts("\n### LARGE TESTS V2 ### ");
         puts("1000 FILES, 600 ROWS");
         run_time_test(1000, 600);
-    
+
         return 0;
     }
-
-    //struct tms operation_time[8];
-    //clock_t operation_time_real[8];
-    //times(&operation_time[0]);
-    //operation_time_real[0] = clock();
 
     struct block *table = NULL;
     struct pair *pairs = NULL;
@@ -221,7 +221,7 @@ int main(int argc, char **argv) {
     dl_merge(pairs, blocks);
 
     for(int j = 0; j < blocks; j++) {
-        dl_add_block(table, pairs[j].merged_adress, j, pairs[j].rows);
+        dl_add_block(table, pairs[j].tmp, j, pairs[j].rows);
     }
 
     puts("\n### INITAL BLOCKS ###");
@@ -256,6 +256,9 @@ int main(int argc, char **argv) {
     puts("\n### FINAL BLOCKS ###");
     dl_display_table(table, blocks);
     puts("");
+
+    free(table);
+    free(pairs);
 
     return 0;
 }
