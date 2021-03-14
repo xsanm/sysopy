@@ -1,6 +1,0 @@
-block 1 file 2 row 1
-block 1 file 2 row 2
-block 1 file 2 row 3
-block 1 file 2 row 4
-block 1 file 2 row 5
-block 1 file 2 row 6
