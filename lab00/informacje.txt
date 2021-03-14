@@ -1,0 +1,60 @@
+Autor: Kamil Kurowski
+
+Interpretacja operacji specyfikowanych w linii polecen:
+1. Zadkladam, ze wywolanie programu bedzie wygladalo w nastepujacy sposob:
+
+./a create_table X merge_files {X par, kazda oddzielona dwukropkiem} {dowolna ilosc operacji remove_block lub remove_row}
+
+W takim przypadku program wypisuje do konsoli poczatkowa wartosc blokow, oraz koncowa
+po operacjach usuniecia.
+
+2. Uruchomienie testow:
+
+./a test 
+
+Wtedy nastepuje uruchomienie funkcji testujacej, ktora ktora generuje dane testowe, oraz
+mierzy czasy i wypisuje je na konsole. 
+
+Wybralem taka opcje, poniewaz specyfikowanie testu dla np. 1000 plikow z linii polecen
+byloby niezwykle uciazliwe.
+
+
+Pliki makefile:
+
+Zad1:
+static - biblioteka kompilowana w sposob statyczny
+shared - biblioteka kompilowana w sposob dzielony
+
+Zad2:
+zad2_display - kompiluje calosc (biblioteke w sposob statyczny) oraz demonstruje dzialanie
+                na 1 oraz 2 parach plikow 
+
+zad2_tests - kompiluje calosc (biblioteke w sposob statyczny) oraz uruchamia testy,
+                wyniki czasow wypisuje na konsole i zapisuje do pliku raport2.txt
+
+Zad3:
+zad3_display - kompiluje calosc (biblioteke w sposob statyczny) oraz demonstruje dzialanie
+                na 1 oraz 2 parach plikow 
+
+zad3_static - kompiluje calosc (biblioteke w sposob statyczny) oraz uruchamia testy,
+                wyniki czasow wypisuje na konsole
+
+zad3_shared - kompiluje calosc (biblioteke w sposob dzielony) oraz uruchamia testy,
+                wyniki czasow wypisuje na konsole
+
+zad3_dynamic - kompiluje calosc (biblioteke w sposob dynamiczny) oraz uruchamia testy,
+                wyniki czasow wypisuje na konsole
+
+zad3a - dla 3 rodzajow linkowania biblioteki uruchamia testy i zapisuje wyniki czasowe 
+        do pliku results3a.txt
+
+zad3b - dla 3 rodzajow linkowania biblioteki oraz 3 roznych flag kompilacji (01, 02, 0s) -
+        czyli lacznie dla 9 przypadkow uruchamia testy i zapisuje wyniki czasowe 
+        do pliku results3b.txt
+
+
+Komentarze do wynikow:
+-usuwanie blokow trwa zdecydowanie najkrocej
+-mergowanie i zapisywanie dziala w zblizonym do siebie czasie
+-program z biblioteka dolaczona statycznie dziala szybciej niz w przypadku pozostalych dwoch
+-flagi 02 oraz 0s znacznie przyspieszyly dzialanie programu
