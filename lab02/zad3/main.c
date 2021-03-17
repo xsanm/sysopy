@@ -20,8 +20,8 @@ double calculate_time_tics(clock_t start, clock_t end) {
     return (double) (end - start) / sysconf(_SC_CLK_TCK);
 }
 
-void rows_sys(const char *file_name, const  char c) {
-    //printf("File and char: %s %c\n", file_name, c);
+void cp_sys(const char *file_name) {
+    printf("File and char: %s \n", file_name);
     int f = open(file_name, O_RDONLY);
     if(f < 0) {
         printf("Error while reading: %s\n", strerror(errno));
@@ -29,66 +29,45 @@ void rows_sys(const char *file_name, const  char c) {
     }
     puts("SYSTEM");
 
-    char *buff = malloc(BUFF_SIZE * sizeof (char ));
-    size_t readed = read(f, buff, BUFF_SIZE);
-    int ptr = 0;
+    long long number;
+    size_t readed = read(f, &number, 1);
 
     while(readed != 0) {
-        ptr = 0;
-        int c_occur = 0;
-        while(buff[ptr] != '\n') {
-            if(buff[ptr] == c) c_occur = 1;
-            ptr++;
-        }
-        if(c_occur == 1) fwrite(buff, sizeof (char), ptr + 1, stdout);
-        lseek(f, ptr - readed + 1, SEEK_CUR);
-        readed = read(f, buff, BUFF_SIZE);
+        printf("%lld\n", number);
+        readed = read(f, &number, 1);
     }
 
     close(f);
-    free(buff);
 }
 
-void rows_lib(const char *file_name, const  char c) {
-    //printf("File and char: %s %c\n", file_name, c);
-    FILE *f = fopen(file_name, "r");
+void cp_lib(const char *file_name) {
+    printf("File and char: %s \n", file_name);
+    FILE *f = fopen(file_name, "rb");
     if(f == NULL) {
         printf("Error while reading: %s\n", strerror(errno));
         return;
     }
     puts("LIBRARY");
 
-    char *buff = malloc(BUFF_SIZE * sizeof (char ));
-    size_t readed = fread(buff, sizeof (char), BUFF_SIZE, f);
-    int ptr = 0;
+    size_t readed = fread(&number, sizeof (int), 1, f);
+    printf("%d\n", readed);
 
     while(readed != 0) {
-        ptr = 0;
-        int c_occur = 0;
-        while(buff[ptr] != '\n') {
-            if(buff[ptr] == c) c_occur = 1;
-            ptr++;
-        }
-        if(c_occur == 1) fwrite(buff, sizeof (char), ptr + 1, stdout);
-        fseek(f, ptr - readed + 1, 1);
-        readed = fread(buff, sizeof (char), BUFF_SIZE, f);
+        printf("%d\n", number);
+        readed = fread(&number, sizeof (int), 1, f);
     }
 
     fclose(f);
-    free(buff);
 }
 
 int main(int argc, char **argv) {
 
     char *file_name = calloc(256, sizeof (char));
-    char c;
 
-    if(argc == 3 && strlen(argv[1]) == 1) {
-        c = *argv[1];
-        strcpy(file_name, argv[2]);
+    if(argc == 2) {
+        strcpy(file_name, argv[1]);
     } else {
-        puts("WRONG ARGUMENTS");
-        return 0;
+        strcpy(file_name, "dane.txt");
     }
 
     struct tms operation_time[5]; //usr and sys
@@ -97,13 +76,13 @@ int main(int argc, char **argv) {
     times(&operation_time[0]);
     operation_time_real[0] = clock();
 
-    rows_lib(file_name, c);
+    cp_lib(file_name);
     puts("");
 
     times(&operation_time[1]);
     operation_time_real[1] = clock();
 
-    rows_sys(file_name, c);
+    cp_sys(file_name);
 
     times(&operation_time[2]);
     operation_time_real[2] = clock();
