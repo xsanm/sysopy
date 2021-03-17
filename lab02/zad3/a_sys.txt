@@ -1,0 +1,4 @@
+Liczb parzystych jest 3                         
+36
+1000000
+135232

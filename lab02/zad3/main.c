@@ -34,9 +34,9 @@ void cp_sys(const char *file_name) {
         printf("Error while reading: %s\n", strerror(errno));
         return;
     }
-    int a = open("a_sys.txt", O_CREAT, 0666 | O_RDWR);
-    int b = open("b_sys.txt", O_CREAT, 0666 | O_RDWR);
-    int c = open("c_sys.txt", O_CREAT, 0666 | O_RDWR);
+    int a = open("a_sys.txt", O_CREAT | O_RDWR | O_TRUNC, 0666);
+    int b = open("b_sys.txt", O_CREAT | O_RDWR | O_TRUNC, 0666);
+    int c = open("c_sys.txt", O_CREAT | O_RDWR | O_TRUNC, 0666);
 
     if(a < 0 || b < 0 || c < 0) {
         printf("Error while opening: %s\n", strerror(errno));
@@ -45,17 +45,19 @@ void cp_sys(const char *file_name) {
     char endline = '\n';
 
     puts("SYSTEM");
-
+    //rintf("%d\n", a);
     long long number;
     char cr;
     //int readed;
-    char tmp[256] = "        dsd                                       \n";
-    char *tmp2 = "dsgsfdghshf";
-    write(a, tmp2, strlen(tmp2));
+    char tmp[256] = "                                                \n";
+    //char *tmp2 = "dsgsfdghshf";
+    //rintf("%d\n", write(a, tmp2, strlen(tmp2)));
+    //printf("Error while opening: %s\n", strerror(errno));
+    write(a, tmp, strlen(tmp));
     write(b, tmp, strlen(tmp));
     write(c, tmp, strlen(tmp));
 
-    /*int even = 0, tenth = 0, squares = 0;
+    int even = 0, tenth = 0, squares = 0;
 
     int was_nr;
     size_t readed = 1;
@@ -65,14 +67,13 @@ void cp_sys(const char *file_name) {
         readed = 0;
         was_nr = 0;
         readed = read(f, &cr, 1);
-        while(readed != 0 && c <= '9' && c >= '0'){
+        while(readed != 0 && cr <= '9' && cr >= '0'){
             number *= 10;
-            number += (c - '0');
+            number += (cr - '0');
             was_nr = 1;
             readed = read(f, &cr, 1);
         }
         if(was_nr == 1) {
-
             sprintf(tmp, "%lld", number);
             long long tmp_n = (number % 100) / 10;
             if((number & 1) == 0) {
@@ -93,6 +94,10 @@ void cp_sys(const char *file_name) {
         }
     }
 
+    lseek(a, 0, SEEK_SET);
+    lseek(b, 0, SEEK_SET);
+    lseek(c, 0, SEEK_SET);
+
     sprintf(tmp, "%s", "Liczb parzystych jest ");
     write(a, tmp, strlen(tmp));
     sprintf(tmp, "%d", even);
@@ -107,7 +112,7 @@ void cp_sys(const char *file_name) {
     write(c, tmp, strlen(tmp));
     sprintf(tmp, "%d", squares);
     write(c, &tmp, strlen(tmp));
-*/
+
     close(a);
     close(b);
     close(c);

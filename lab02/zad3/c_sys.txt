@@ -1,0 +1,4 @@
+Liczb bedacych kwadratami jest 3                
+36
+1000000
+81
