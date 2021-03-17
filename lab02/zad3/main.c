@@ -20,6 +20,13 @@ double calculate_time_tics(clock_t start, clock_t end) {
     return (double) (end - start) / sysconf(_SC_CLK_TCK);
 }
 
+bool is_squared(long long num) {
+    long long i = 0;
+    while(i * i < num) i++;
+    if(i * i == num) return true;
+    return false;
+}
+
 void cp_sys(const char *file_name) {
     printf("File and char: %s \n", file_name);
     int f = open(file_name, O_RDONLY);
@@ -30,11 +37,22 @@ void cp_sys(const char *file_name) {
     puts("SYSTEM");
 
     long long number;
-    size_t readed = read(f, &number, 1);
+    char c;
+    int was_nr;
+    size_t readed = 1;
 
     while(readed != 0) {
-        printf("%lld\n", number);
-        readed = read(f, &number, 1);
+        number = 0;
+        readed = 0;
+        was_nr = 0;
+        readed = read(f, &c, 1);
+        while(readed != 0 && c <= '9' && c >= '0'){
+            number *= 10;
+            number += (c - '0');
+            was_nr = 1;
+            readed = read(f, &c, 1);
+        }
+        if(was_nr == 1) printf("%lld\n", number);
     }
 
     close(f);
@@ -47,16 +65,80 @@ void cp_lib(const char *file_name) {
         printf("Error while reading: %s\n", strerror(errno));
         return;
     }
+    FILE *a = fopen("a_lib.txt", "w+");
+    FILE *b = fopen("b_lib.txt", "w+");
+    FILE *c = fopen("c_lib.txt", "w+");
+
+    if(a == NULL || b == NULL || c == NULL) {
+        printf("Error while opening: %s\n", strerror(errno));
+        return;
+    }
+    char endline = '\n';
+
     puts("LIBRARY");
 
-    size_t readed = fread(&number, sizeof (int), 1, f);
-    printf("%d\n", readed);
+    long long number;
+    char cr;
+    int readed;
+    char tmp[256] = "                                               \n";
+    fwrite(tmp, sizeof (char), strlen(tmp), a);
+    fwrite(tmp, sizeof (char), strlen(tmp), b);
+    fwrite(tmp, sizeof (char), strlen(tmp), c);
 
-    while(readed != 0) {
-        printf("%d\n", number);
-        readed = fread(&number, sizeof (int), 1, f);
+    int even = 0, tenth = 0, squares = 0;
+
+    while(!feof(f)) {
+        number = 0;
+        readed = 0;
+        while(fread(&cr, sizeof (char), 1, f) && cr <= '9' && cr >= '0'){
+            number *= 10;
+            number += (cr - '0');
+            readed = 1;
+        }
+        if(readed == 1) {
+
+            sprintf(tmp, "%lld", number);
+            long long tmp_n = (number % 100) / 10;
+            if((number & 1) == 0) {
+                even++;
+                fwrite(tmp, sizeof (char), strlen(tmp), a);
+                fwrite(&endline, sizeof (char), 1, a);
+            }
+            if(number > 9 && (tmp_n == 0 || tmp_n == 7)) {
+                tenth++;
+                fwrite(tmp, sizeof (char), strlen(tmp), b);
+                fwrite(&endline, sizeof (char), 1, b);
+            }
+            if(is_squared(number)) {
+                squares++;
+                fwrite(tmp, sizeof (char), strlen(tmp), c);
+                fwrite(&endline, sizeof (char), 1, c);
+            }
+        }
     }
 
+    rewind(a);
+    rewind(b);
+    rewind(c);
+
+    sprintf(tmp, "%s", "Liczb parzystych jest ");
+    fwrite(tmp, sizeof (char), strlen(tmp), a);
+    sprintf(tmp, "%d", even);
+    fwrite(tmp, sizeof (char), strlen(tmp), a);
+
+    sprintf(tmp, "%s", "Liczb z 0 lub 7 jako dziesiatki jest ");
+    fwrite(tmp, sizeof (char), strlen(tmp), b);
+    sprintf(tmp, "%d", tenth);
+    fwrite(tmp, sizeof (char), strlen(tmp), b);
+
+    sprintf(tmp, "%s", "Liczb bedacych kwadratami jest ");
+    fwrite(tmp, sizeof (char), strlen(tmp), c);
+    sprintf(tmp, "%d", squares);
+    fwrite(tmp, sizeof (char), strlen(tmp), c);
+
+    fclose(a);
+    fclose(b);
+    fclose(c);
     fclose(f);
 }
 
