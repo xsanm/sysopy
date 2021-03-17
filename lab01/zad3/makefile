@@ -29,7 +29,7 @@ zad3_static: clean static
 	make clean
 
 zad3_shared: clean shared
-	$(CC) $(CFLAGS) -o test main.c lib_shared.so -L. -Wl,-rpath=.
+	$(CC) $(CFLAGS)  main.c lib_shared.so -L. -Wl,-rpath=. -o test
 	./test tests
 	make clean
 
