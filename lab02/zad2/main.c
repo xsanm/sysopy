@@ -98,6 +98,7 @@ int main(int argc, char **argv) {
     operation_time_real[0] = clock();
 
     rows_lib(file_name, c);
+    puts("");
 
     times(&operation_time[1]);
     operation_time_real[1] = clock();
