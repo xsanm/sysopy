@@ -41,7 +41,7 @@ void merge_sys(const char *file_name_1, const char *file_name_2) {
     while(readed_1 || readed_2) {
         bool act_row_1 = true;
         while(readed_1 != 0 && act_row_1) {
-            fwrite(&buff1[ptr1], sizeof (char), 1, stdout);
+            write(1, &buff1[ptr1], 1);
             ptr1++;
             act_row_1 = buff1[ptr1 - 1] != '\n';
             if(ptr1 >= readed_1) {
@@ -52,7 +52,7 @@ void merge_sys(const char *file_name_1, const char *file_name_2) {
 
         bool act_row_2 = true;
         while(readed_2 != 0 && act_row_2) {
-            fwrite(&buff2[ptr2], sizeof (char), 1, stdout);
+            write(1, &buff2[ptr2], 1);
             ptr2++;
             act_row_2 = buff2[ptr2 - 1] != '\n';
             if(ptr2 >= readed_2) {

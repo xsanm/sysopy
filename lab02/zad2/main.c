@@ -40,7 +40,7 @@ void rows_sys(const char *file_name, const  char c) {
             if(buff[ptr] == c) c_occur = 1;
             ptr++;
         }
-        if(c_occur == 1) fwrite(buff, sizeof (char), ptr + 1, stdout);
+        if(c_occur == 1) write(1, buff, ptr + 1);
         lseek(f, ptr - readed + 1, SEEK_CUR);
         readed = read(f, buff, BUFF_SIZE);
     }
