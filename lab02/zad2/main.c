@@ -20,57 +20,37 @@ double calculate_time_tics(clock_t start, clock_t end) {
     return (double) (end - start) / sysconf(_SC_CLK_TCK);
 }
 
-/*void merge_sys(const char *file_name_1, const char *file_name_2) {
-    //printf("Files: %s %s\n", file_name_1, file_name_2);
-    int f1 = open(file_name_1, O_RDONLY);
-    int f2 = open(file_name_2, O_RDONLY);
-    if(f1 == -1 || f2 == -1) {
+void rows_sys(const char *file_name, const  char c) {
+    //printf("File and char: %s %c\n", file_name, c);
+    int f = open(file_name, O_RDONLY);
+    if(f < 0) {
         printf("Error while reading: %s\n", strerror(errno));
         return;
     }
     puts("SYSTEM");
 
+    char *buff = malloc(BUFF_SIZE * sizeof (char ));
+    size_t readed = read(f, buff, BUFF_SIZE);
+    int ptr = 0;
 
-    char *buff1 = malloc(BUFF_SIZE * sizeof (char ));
-    char *buff2 = malloc(BUFF_SIZE * sizeof (char ));
-
-    size_t readed_1 = read(f1, buff1, BUFF_SIZE);
-    size_t readed_2 = read(f2, buff2, BUFF_SIZE);
-    size_t ptr1 = 0, ptr2 = 0;
-
-    while(readed_1 || readed_2) {
-        bool act_row_1 = true;
-        while(readed_1 != 0 && act_row_1) {
-            putchar(buff1[ptr1]);
-            ptr1++;
-            act_row_1 = buff1[ptr1 - 1] != '\n';
-            if(ptr1 >= readed_1) {
-                readed_1 = read(f1, buff1, BUFF_SIZE);
-                ptr1 = 0;
-            }
+    while(readed != 0) {
+        ptr = 0;
+        int c_occur = 0;
+        while(buff[ptr] != '\n') {
+            if(buff[ptr] == c) c_occur = 1;
+            ptr++;
         }
-
-        bool act_row_2 = true;
-        while(readed_2 != 0 && act_row_2) {
-            putchar(buff2[ptr2]);
-            ptr2++;
-            act_row_2 = buff2[ptr2 - 1] != '\n';
-            if(ptr2 >= readed_2) {
-                readed_2 = read(f2, buff2, BUFF_SIZE);
-                ptr2 = 0;
-            }
-        }
-
+        if(c_occur == 1) printf("%.*s", ptr + 1, buff);
+        lseek(f, ptr - readed + 1, SEEK_CUR);
+        readed = read(f, buff, BUFF_SIZE);
     }
 
-    close(f1);
-    close(f2);
-    free(buff1);
-    free(buff2);
-}*/
+    close(f);
+    free(buff);
+}
 
-void merge_lib(const char *file_name, const  char c) {
-    printf("File and char: %s %c\n", file_name, c);
+void rows_lib(const char *file_name, const  char c) {
+    //printf("File and char: %s %c\n", file_name, c);
     FILE *f = fopen(file_name, "r");
     if(f == NULL) {
         printf("Error while reading: %s\n", strerror(errno));
@@ -117,12 +97,12 @@ int main(int argc, char **argv) {
     times(&operation_time[0]);
     operation_time_real[0] = clock();
 
-    merge_lib(file_name, c);
+    rows_lib(file_name, c);
 
     times(&operation_time[1]);
     operation_time_real[1] = clock();
 
-    //merge_sys(file_name_1, file_name_2);
+    rows_sys(file_name, c);
 
     times(&operation_time[2]);
     operation_time_real[2] = clock();
