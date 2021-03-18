@@ -48,10 +48,8 @@ void change_sys(const char *file_name_1, const char *file_name_2, const char *n1
         }
     }
 
-
     close(f1);
     close(f2);
-
 }
 
 void change_lib (const char *file_name_1, const char *file_name_2, const char *n1, const char *n2) {
@@ -82,10 +80,8 @@ void change_lib (const char *file_name_1, const char *file_name_2, const char *n
             }
         }
     }
-
     fclose(f1);
     fclose(f2);
-
 }
 
 int main(int argc, char **argv) {
@@ -108,7 +104,7 @@ int main(int argc, char **argv) {
     times(&operation_time[0]);
     operation_time_real[0] = clock();
 
-    //change_lib(file_name_1, file_name_2, argv[3], argv[4]);
+    change_lib(file_name_1, file_name_2, argv[3], argv[4]);
 
     times(&operation_time[1]);
     operation_time_real[1] = clock();

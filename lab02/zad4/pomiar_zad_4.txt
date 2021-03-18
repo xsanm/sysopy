@@ -1,0 +1,16 @@
+SMALL
+              REAl        USER        SYSTEM
+LIBRARY     0.000080    0.000000    0.000000
+SYSTEM      0.001309    0.000000    0.000000
+
+MEDIUM
+              REAl        USER        SYSTEM
+LIBRARY     0.015401    0.010000    0.000000
+SYSTEM      1.109854    0.070000    1.030000
+
+BIG
+              REAl        USER        SYSTEM
+LIBRARY     0.177124    0.170000    0.000000
+SYSTEM      11.176982    0.500000    10.670000
+
+WTF?

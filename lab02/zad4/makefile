@@ -9,13 +9,13 @@ clean:
 
 
 small: compile
-	./prog small1.txt small2.txt hehe chujjj
+	./prog small1.txt small2.txt hehe toNieJestSmiesze
 	make clean
 
 medium: compile
-	./prog medium1.txt medium2.txt
+	./prog medium1.txt medium2.txt Bv63Rk SDFHGEHTJDSFHDHDFH
 	make clean
 
 big: compile
-	./prog big1.txt big2.txt
+	./prog big1.txt big2.txt Bv63Rk SDFHGEHTJDSFHDHDFH
 	make clean

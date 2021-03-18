@@ -1,0 +1,19 @@
+SMALL
+              REAl        USER        SYSTEM
+LIBRARY     0.000071    0.000000    0.000000
+SYSTEM      0.001575    0.000000    0.000000
+
+MEDIUM
+              REAl        USER        SYSTEM
+LIBRARY     0.019517    0.020000    0.000000
+SYSTEM      1.085685    0.030000    1.050000
+
+BIG
+              REAl        USER        SYSTEM
+LIBRARY     0.166870    0.160000    0.000000
+SYSTEM      11.497070    0.450000    11.040000
+
+
+:O :O :O
+Funkcje systemowe sa bardzo wolne, najprawdopobniej jest to wina wczytywania po 1 znaku, bez uzycia buforu,
+jednak uznalem ze w tym zadaniu uzyje takiej metody, poniewaz we wczesniejszych zadaniach korzystalem z buforu.
