@@ -10,7 +10,7 @@ void generate_random_line(int a, int b) {
     for (int i = 0; i < SIZE; i++) {
         putchar(base[rand() % strlen(base)]);
     }
-    puts("");
+    puts(" ");
 
 
 
@@ -20,7 +20,12 @@ void generate_random_line(int a, int b) {
 int main() {
     srand(time(NULL));
 
-    for(int i = 0; i < 5000; i++) generate_random_line(200, 255);
+    for(int i = 1; i < 100000; i++) {
+        printf("%d ", rand() % 1000000000);
+        if(i % 100 == 0) puts("");
+    }
+
+
 
     return 0;
 }

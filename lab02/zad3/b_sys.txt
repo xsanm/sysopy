@@ -1,3 +1,4 @@
-Liczb z 0 lub 7 jako dziesiatki jest 2          
-1000000
-32532571
+Liczb z 0 lub 7 jako dziesiatki jest 3          
+787260605
+96926906
+481548801

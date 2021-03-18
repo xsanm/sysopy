@@ -1,0 +1,19 @@
+SMALL
+              REAl        USER        SYSTEM
+LIBRARY     0.002261    0.000000    0.000000
+SYSTEM      0.002424    0.000000    0.000000
+
+MEDIUM
+              REAl        USER        SYSTEM
+LIBRARY     0.038979    0.030000    0.000000
+SYSTEM      0.044324    0.040000    0.000000
+
+BIG
+              REAl        USER        SYSTEM
+LIBRARY     3.892427    3.880000    0.000000
+SYSTEM      4.389430    3.960000    0.430000
+
+Funkcje biblioteczne szybsze ale nie wiele, wiekszosc czasu zajmuja operacje matematyczne.
+
+
+

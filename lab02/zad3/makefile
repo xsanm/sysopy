@@ -5,7 +5,7 @@ compile:
 	$(CC) $(CFLAGS) main.c -o prog
 
 clean:
-	rm -f prog, a.txt, b.txt, c.txt
+	rm -f prog, a_lib.txt, b_lib.txt, c_lib.txt, a_sys.txt, b_sys.txt, c_sys.txt
 
 run: compile
 	./prog

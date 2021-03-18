@@ -42,23 +42,18 @@ void cp_sys(const char *file_name) {
         printf("Error while opening: %s\n", strerror(errno));
         return;
     }
-    char endline = '\n';
-
     puts("SYSTEM");
-    //rintf("%d\n", a);
+
     long long number;
     char cr;
-    //int readed;
+    char endline = '\n';
+
     char tmp[256] = "                                                \n";
-    //char *tmp2 = "dsgsfdghshf";
-    //rintf("%d\n", write(a, tmp2, strlen(tmp2)));
-    //printf("Error while opening: %s\n", strerror(errno));
     write(a, tmp, strlen(tmp));
     write(b, tmp, strlen(tmp));
     write(c, tmp, strlen(tmp));
 
     int even = 0, tenth = 0, squares = 0;
-
     int was_nr;
     size_t readed = 1;
 
