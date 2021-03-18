@@ -10,7 +10,7 @@
 #include <sys/times.h>
 #include <time.h>
 
-const size_t BUFF_SIZE = 512;
+const size_t BUFF_SIZE = 1024;
 
 double calculate_time_clocks(clock_t start, clock_t end) {
     return (double) (end - start) / CLOCKS_PER_SEC;
@@ -90,7 +90,7 @@ void merge_lib(const char *file_name_1, const  char *file_name_2) {
     while(readed_1 || readed_2) {
         bool act_row_1 = true;
         while(readed_1 != 0 && act_row_1) {
-            putchar(buff1[ptr1]);
+            fwrite(&buff1[ptr1], sizeof (char), 1, stdout);
             ptr1++;
             act_row_1 = buff1[ptr1 - 1] != '\n';
             if(ptr1 >= readed_1) {
@@ -101,7 +101,7 @@ void merge_lib(const char *file_name_1, const  char *file_name_2) {
 
         bool act_row_2 = true;
         while(readed_2 != 0 && act_row_2) {
-            putchar(buff2[ptr2]);
+            fwrite(&buff2[ptr2], sizeof (char), 1, stdout);
             ptr2++;
             act_row_2 = buff2[ptr2 - 1] != '\n';
             if(ptr2 >= readed_2) {
