@@ -1,0 +1,18 @@
+SMALL
+              REAl        USER        SYSTEM
+LIBRARY     0.000062    0.000000    0.000000
+SYSTEM      0.000039    0.000000    0.000000
+
+MEDIUM
+              REAl        USER        SYSTEM
+LIBRARY     0.029446    0.020000    0.000000
+SYSTEM      0.024956    0.010000    0.010000
+
+BIG
+              REAl        USER        SYSTEM
+LIBRARY     0.279708    0.200000    0.080000
+SYSTEM      0.303547    0.210000    0.080000
+
+Powtorzylem pomiary klikukrotnie, i sa bardzo randomowe pomimo, iz dzialaja na tych samych plikach.
+Dla Funkcji bibliotecznych BUFF_SIZE nie ma znaczenia, natomiast dla systemowych juz tak (im mniejszy rozmiar tym wolniej).
+
