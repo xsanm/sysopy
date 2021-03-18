@@ -29,10 +29,10 @@ void cut_sys(const char *file_name_1, const char *file_name_2) {
         return;
     }
     puts("SYSTEM");
+
     char cr;
     char endline = '\n';
     int cnt = 0;
-
     while(read(f1, &cr, 1) != 0) {
         if(cnt < 50) {
             write(f2, &cr, 1);
@@ -46,10 +46,8 @@ void cut_sys(const char *file_name_1, const char *file_name_2) {
         }
     }
 
-
     close(f1);
     close(f2);
-
 }
 
 void cut_lib (const char *file_name_1, const char *file_name_2) {
@@ -80,7 +78,6 @@ void cut_lib (const char *file_name_1, const char *file_name_2) {
 
     fclose(f1);
     fclose(f2);
-
 }
 
 int main(int argc, char **argv) {
@@ -108,7 +105,7 @@ int main(int argc, char **argv) {
     times(&operation_time[1]);
     operation_time_real[1] = clock();
 
-    //cut_sys(file_name_1, file_name_2);
+    cut_sys(file_name_1, file_name_2);
 
     times(&operation_time[2]);
     operation_time_real[2] = clock();
