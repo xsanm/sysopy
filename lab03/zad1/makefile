@@ -1,3 +1,3 @@
 run:
-	gcc main_v2.c
-	./a.out 5
+	gcc main_v3.c
+	./a.out 10

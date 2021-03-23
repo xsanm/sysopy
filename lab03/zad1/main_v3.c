@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
@@ -18,14 +19,14 @@ int main(int argc, char **argv) {
     pid_t child_pid = getpid();
     printf("Parent-process pid: %d\n\n", getpid());
 
-    for(int id = 0; id <= pocess_number; id++) {
-        if(child_pid == 0) {
-            printf("Child-process nr: %d, pid: %d, ppid %d\n", id, getpid(), getppid());
+    for(int id = 0; id < pocess_number; id++) {
+        if(fork() == 0) {
+            printf("Child-process nr: %d, pid: %d, ppid %d\n", id + 1, getpid(), getppid());
             return 0;
-        } else {
-            child_pid = fork();
         }
     }
+
+    wait(NULL);
 
     return 0;
 }
