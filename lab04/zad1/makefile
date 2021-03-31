@@ -1,19 +1,14 @@
-run:
-	gcc main.c
-	./a.out handler
 
-run_handler:
-	gcc main.c
+run_fork_test:
+	gcc testing_fork.c
 	./a.out handler
-
-run_ignore:
-	gcc main.c
 	./a.out ignore
-
-run_mask:
-	gcc main.c
 	./a.out mask
+	./a.out pending
 
-run_pending:
-	gcc main.c
+run_exec_test:
+	gcc to_exec.c -o to_exec
+	gcc testing_exec.c
+	./a.out ignore
+	./a.out mask
 	./a.out pending

@@ -43,7 +43,6 @@ void test_ignore() {
         puts("Raising in child");
         raise(T_SIGNAL);
         puts("Not terminated, so signal ingored in child");
-        wait(NULL);
     }
 }
 
@@ -155,9 +154,11 @@ void test_pending() {
         exit(1);
     }
     if(child_id != 0) {
-        printf("%s\n", sigismember (&waiting_mask, T_SIGNAL) ? "Pending in parent" : "Not Pendingin parent");
+        sigpending (&waiting_mask);
+        printf("%s\n", sigismember (&waiting_mask, T_SIGNAL) ? "Pending in parent" : "Not Pendingi n parent");
     } else {
-        printf("%s\n", sigismember (&waiting_mask, T_SIGNAL) ? "Pending in parent" : "Not Pendingin parent");
+        sigpending (&waiting_mask);
+        printf("%s\n", sigismember (&waiting_mask, T_SIGNAL) ? "Pending in child" : "Not Pending in child");
     }
 
 }
