@@ -1,5 +1,10 @@
 
-SIGUSR1
+Testy wykonane dla:
+SIGINT, SIGQUIT, SIGTSTP, SIGTERM, SIGSEGV, SIGHUP, SIGALARM, SIGCHLD, SIGUSR1, SIGUSR2
+
+Sygnaly:
+SIGKILL, SIGSTOP
+Nie mogą być maskowane lub obsluzone w inny sposob niz domyslny
 
 ----------FORK----------
 
