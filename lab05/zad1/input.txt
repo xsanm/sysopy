@@ -1,0 +1,1 @@
+skladnik1 = cat /etc/passwd | grep "^s"
