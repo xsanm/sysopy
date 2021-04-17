@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
         puts("ERROR WHILE OPENING FIFO");
         return 2;
     }
-
+    sleep(1);
     char *data = malloc(sizeof (char) * n);
     while(fread(data, sizeof (char), n, file_d) == n) {
         //sleep(1);

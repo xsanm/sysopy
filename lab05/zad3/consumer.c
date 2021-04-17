@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
         if(line > lines) {
             printf("%d\n", line);
             line_chars = realloc(line_chars, line + 1);
-            for(int i = lines; i <= line; i++){
+            for(int i = lines + 1; i <= line; i++){
                 line_chars[i] = 4;
                 fseek(file_d, BUFF_FILL * (i - 1), SEEK_SET);
 
