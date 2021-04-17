@@ -21,6 +21,24 @@ typedef struct Component { //whole component e.g: grep "^s" | cut -b "1-20", and
     int no_commands;
 } Component;
 
+void execute_commands(Command **to_run, int cnt);
+Command split_to_command(char *tmp);
+void parse_line(char *line, Component *comp);
+void parse_file(char *file_name);
+void parse_component(char *line, Component *components, int no_components);
+
+
+
+int main(int argc, char **argv) {
+
+    if(argc != 2) {
+        puts("ERROR wrong angurments");
+    }
+    parse_file(argv[1]);
+
+    return 0;
+
+}
 
 Command split_to_command(char *tmp) {
     Command res;
@@ -75,7 +93,7 @@ void parse_line(char *line, Component *comp) {
 void execute_commands(Command **to_run, int cnt){
     int **fds = malloc(sizeof (int *) * cnt);
 
-
+    //creating pipes
     for(int i = 0; i < cnt ; i++) {
         fds[i] = malloc(sizeof (int) * 2);
         if (pipe(fds[i]) < 0) {
@@ -107,6 +125,7 @@ void execute_commands(Command **to_run, int cnt){
     for (int i = 0; i < cnt; i++)
         wait(NULL);
 
+    puts("\n");
 }
 
 void parse_component(char *line, Component *components, int no_components) {
@@ -167,15 +186,4 @@ void parse_file(char *file_name) {
     free(line);
 
     return;
-}
-
-int main(int argc, char **argv) {
-
-    if(argc != 2) {
-        puts("ERROR wrong angurments");
-    }
-    parse_file(argv[1]);
-
-    return 0;
-    
 }
