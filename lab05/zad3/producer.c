@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/file.h>
 #include <string.h>
 #include <errno.h>
 
@@ -37,10 +38,13 @@ int main(int argc, char **argv) {
 
     char *data = malloc(sizeof (char) * n);
     while(fread(data, sizeof (char), n, file_d) == n) {
-        sleep(1);
+        //sleep(1);
+        flock(fileno(fifo_d), LOCK_EX);
         fwrite(&row,sizeof(int),1, fifo_d);
         fwrite(data, sizeof (char), n, fifo_d);
+        flock(fileno(fifo_d), LOCK_UN);
     }
+
 
     fclose(file_d);
     fclose(fifo_d);

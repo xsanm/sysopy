@@ -56,19 +56,19 @@ int main(int argc, char **argv) {
             line_chars = realloc(line_chars, line + 1);
             for(int i = lines; i <= line; i++){
                 line_chars[i] = 4;
-                fseek(file_d, BUFF_FILL * i, SEEK_SET);
+                fseek(file_d, BUFF_FILL * (i - 1), SEEK_SET);
 
                 char str[5];
-                sprintf(str, "%d", i + 1);
+                sprintf(str, "%d", i);
 
                 fwrite(fill, sizeof (char ), strlen(fill), file_d);
-                fseek(file_d, BUFF_FILL * i, SEEK_SET);
+                fseek(file_d, BUFF_FILL * (i - 1), SEEK_SET);
                 fwrite(str, sizeof (char ), strlen(str), file_d);
             }
             lines = line;
         }
 
-        fseek(file_d, BUFF_FILL * line + line_chars[line], SEEK_SET);
+        fseek(file_d, BUFF_FILL * (line - 1) + line_chars[line], SEEK_SET);
         fwrite(data, sizeof (char), n, file_d);
         line_chars[line] += n;
 
