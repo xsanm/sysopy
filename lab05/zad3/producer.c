@@ -12,6 +12,7 @@
 
 
 int main(int argc, char **argv) {
+    puts("producer");
     if(argc != 5) {
         puts("WRONG NUMBER OF ARGUMENTS");
         return 1;
@@ -36,7 +37,7 @@ int main(int argc, char **argv) {
 
     char *data = malloc(sizeof (char) * n);
     while(fread(data, sizeof (char), n, file_d) == n) {
-        //sleep(1);
+        sleep(1);
         fwrite(&row,sizeof(int),1, fifo_d);
         fwrite(data, sizeof (char), n, fifo_d);
     }

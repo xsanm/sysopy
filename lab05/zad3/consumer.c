@@ -14,6 +14,7 @@ const int BUFF_FILL = 1024;
 
 
 int main(int argc, char **argv) {
+    puts("Consumer");
     if(argc != 4) {
         puts("WRONG NUMBER OF ARGUMENTS");
         return 1;
@@ -51,6 +52,7 @@ int main(int argc, char **argv) {
         fread(data, sizeof (char), n, fifo_d);
 
         if(line > lines) {
+            printf("%d\n", line);
             line_chars = realloc(line_chars, line + 1);
             for(int i = lines; i <= line; i++){
                 line_chars[i] = 4;
@@ -70,7 +72,7 @@ int main(int argc, char **argv) {
         fwrite(data, sizeof (char), n, file_d);
         line_chars[line] += n;
 
-        //printf("%d %s\n", line, data);
+        printf("%d %s\n", line, data);
     }
 
     fclose(file_d);
