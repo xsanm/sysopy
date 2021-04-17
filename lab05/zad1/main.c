@@ -1,3 +1,4 @@
+#define  _GNU_SOURCE
 #include <stdio.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -88,6 +89,9 @@ void parse_line(char *line, Component *comp) {
     for(int i = 0; i < comp->no_commands; i++) {
         comp->commands[i] = split_to_command(lines[i]);
     }
+
+    for(int i = 0; i < comp->no_commands; i++) free(lines[i]);
+    free(lines);
 }
 
 void execute_commands(Command **to_run, int cnt){
@@ -126,6 +130,10 @@ void execute_commands(Command **to_run, int cnt){
         wait(NULL);
 
     puts("\n");
+    for(int i = 0; i < cnt ; i++) {
+        free(fds[i]);
+    }
+    free(fds);
 }
 
 void parse_component(char *line, Component *components, int no_components) {
@@ -151,6 +159,9 @@ void parse_component(char *line, Component *components, int no_components) {
         exp = strtok(NULL, "| \n\t");
     }
     execute_commands(to_run, id + 1);
+
+
+    free(to_run);
 }
 
 void parse_file(char *file_name) {
@@ -184,6 +195,16 @@ void parse_file(char *file_name) {
         }
     }
     free(line);
-
+    for(int i = 0; i < no_components; i++) {
+        for(int j = 0; j < components[i].no_commands; j++) {
+            for(int k = 0; k < components[i].commands[j].no_elements; k++)
+                free(components[i].commands[j].expression[k]);
+            free(components[i].commands[j].expression);
+        }
+        free(components[i].commands);
+        free(components[i].name);
+    }
+    free(components);
+    fclose(f);
     return;
 }
