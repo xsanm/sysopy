@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
                 fseek(file_d, BUFF_FILL * i, SEEK_SET);
 
                 char str[5];
-                sprintf(str, "%d", i);
+                sprintf(str, "%d", i + 1);
 
                 fwrite(fill, sizeof (char ), strlen(fill), file_d);
                 fseek(file_d, BUFF_FILL * i, SEEK_SET);
