@@ -1,1 +1,9 @@
-skladnik1 = cat /etc/passwd | grep "^s"
+#comments
+#there must be a wihte space in each sides of "="
+skladnik1 = cat /etc/passwd
+skladnik2 = cat /etc/passwd | grep systemd*
+skladnik1
+skladnik2
+#comment 2
+skladnik3 = grep ^s | cut -b 1-10
+skladnik1 | skladnik3
