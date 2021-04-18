@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
     int *line_chars = NULL;
     int lines = 0;
 
-    char *data = malloc(sizeof (char) * n);
+    char *data = malloc(sizeof (char) * (n + 1));
     int line;
     while(fread(&line, sizeof(int), 1, fifo_d)) {
         fread(data, sizeof (char), n, fifo_d);
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
                 char str[5];
                 sprintf(str, "%d", i);
 
-                fwrite(fill, sizeof (char ), strlen(fill), file_d);
+                fwrite(fill, sizeof (char ), BUFF_FILL, file_d);
                 fseek(file_d, BUFF_FILL * (i - 1), SEEK_SET);
                 fwrite(str, sizeof (char ), strlen(str), file_d);
             }
