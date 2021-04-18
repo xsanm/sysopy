@@ -9,12 +9,13 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/file.h>
 
 const int BUFF_FILL = 1024;
 
 
 int main(int argc, char **argv) {
-    puts("Consumer");
+    //puts("Consumer");
     if(argc != 4) {
         puts("WRONG NUMBER OF ARGUMENTS");
         return 1;
@@ -43,6 +44,7 @@ int main(int argc, char **argv) {
     }
     fill[BUFF_FILL - 1] = '\n';
 
+
     int *line_chars = NULL;
     int lines = 0;
 
@@ -50,9 +52,9 @@ int main(int argc, char **argv) {
     int line;
     while(fread(&line, sizeof(int), 1, fifo_d)) {
         fread(data, sizeof (char), n, fifo_d);
-
+        flock(fileno(file_d), LOCK_EX);
         if(line > lines) {
-            printf("%d\n", line);
+            //printf("%d\n", line);
             line_chars = realloc(line_chars, line + 1);
             for(int i = lines + 1; i <= line; i++){
                 line_chars[i] = 4;
@@ -72,7 +74,8 @@ int main(int argc, char **argv) {
         fwrite(data, sizeof (char), n, file_d);
         line_chars[line] += n;
 
-        printf("%d %s\n", line, data);
+        flock(fileno(file_d), LOCK_UN);
+        //printf("%d %s\n", line, data);
     }
 
     fclose(file_d);

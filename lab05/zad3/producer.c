@@ -13,7 +13,7 @@
 
 
 int main(int argc, char **argv) {
-    puts("producer");
+    //puts("producer");
     if(argc != 5) {
         puts("WRONG NUMBER OF ARGUMENTS");
         return 1;

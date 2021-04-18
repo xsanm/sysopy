@@ -12,4 +12,6 @@ test1:
 	gcc -std=c11 -Wall -ggdb3 producer.c -o producer
 	gcc -std=c11 -Wall -ggdb3 consumer.c -o consumer
 	gcc -std=c11 -Wall -ggdb3 main.c -o test
-	./test
+	./test CASE1
+	./test CASE2
+	./test CASE3

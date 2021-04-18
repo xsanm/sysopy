@@ -8,35 +8,92 @@
 #include <string.h>
 #include <errno.h>
 
+//CASE1 5 producers - 1 consumer
+//CASE2 1 producer - 5 consumer
+//CASE3 5 producer - 5 consumer
 
-int main() {
-    if(mkfifo("fifo_1", 0777) == -1) {
+char FIFO_NAME[] = "fifo_1";
+
+char *P_FILES[] = { "a1.txt", "a2.txt", "a3.txt", "a4.txt", "a5.txt" };
+
+char *C_FILES[] = { "b1.txt", "b2.txt", "b3.txt" };
+
+char P_PROG[] = "./producer";
+char C_PROG[] = "./consumer";
+
+char N1[] = "5";
+char N2[] = "4096";
+
+
+void case1() {
+    puts("5 producers - 1 consumer");
+    char *C_EXEC[] = { C_PROG, FIFO_NAME, C_FILES[0], N1 , NULL};
+    if(fork() == 0)  execvp(C_EXEC[0], C_EXEC);
+
+    for(int i = 0; i < 5; i++) {
+        char str[5];
+        sprintf(str, "%d", i + 1);
+        char *P_EXEC[] = { P_PROG, FIFO_NAME, str, P_FILES[i], N1 , NULL};
+        if(fork() == 0) execvp(P_EXEC[0], P_EXEC);
+    }
+
+    for(int i = 0; i < 6; i++) wait(NULL);
+}
+
+void case2() {
+    puts("1 producer - 5 consumers");
+    char *C_EXEC[] = { C_PROG, FIFO_NAME, C_FILES[1], N1 , NULL};
+    for(int i = 0; i < 5; i++) {
+        if(fork() == 0)  execvp(C_EXEC[0], C_EXEC);
+    }
+
+    char *P_EXEC[] = { P_PROG, FIFO_NAME, "2", P_FILES[4], N1 , NULL};
+    if(fork() == 0) execvp(P_EXEC[0], P_EXEC);
+
+    for(int i = 0; i < 6; i++) wait(NULL);
+}
+
+void case3() {
+    puts("5 producers - 5 consumers");
+    for(int i = 0; i < 5; i++) {
+        char str[5];
+        sprintf(str, "%d", i + 1);
+        char *P_EXEC[] = { P_PROG, FIFO_NAME, str, P_FILES[i], N1 , NULL};
+        if(fork() == 0) execvp(P_EXEC[0], P_EXEC);
+    }
+    char *C_EXEC[] = { C_PROG, FIFO_NAME, C_FILES[2], N1 , NULL};
+    for(int i = 0; i < 5; i++) {
+        if(fork() == 0)  execvp(C_EXEC[0], C_EXEC);
+    }
+
+    for(int i = 0; i < 10; i++) wait(NULL);
+}
+
+int main(int argc, char **argv) {
+
+    if(argc != 2) {
+        puts("WRONG NUMBER OF ARGUMENTS");
+        return 1;
+    }
+
+    if(mkfifo("FIFO_NAME", 0777) == -1) {
         if(errno != EEXIST) {
             puts("ERROR WHILE CREATING FIFO");
             return 1;
         }
     }
-    //./producer fifo_1 4 a.txt 5
-    char *to_exec0[] = {"./consumer", "fifo_1", "b.txt",  "5", NULL};
 
-    char *to_exec1[] = {"./producer", "fifo_1", "1", "a1.txt", "5", NULL};
-    char *to_exec2[] = {"./producer", "fifo_1", "3", "a2.txt", "5", NULL};
-    char *to_exec3[] = {"./producer", "fifo_1", "5", "a3.txt", "5", NULL};
-    char *to_exec4[] = {"./producer", "fifo_1", "2", "a4.txt", "5", NULL};
-    char *to_exec5[] = {"./producer", "fifo_1", "7", "a5.txt", "5", NULL};
-    //char *to_exec1[] = {"producer", "fifo_1", "1", "a.txt", "5", NULL};
-    if(fork() == 0) execvp(to_exec1[0], to_exec1);
-    if(fork() == 0)  execvp(to_exec2[0], to_exec2);
-    if(fork() == 0)  execvp(to_exec3[0], to_exec3);
-    if(fork() == 0)  execvp(to_exec4[0], to_exec4);
-    if(fork() == 0)  execvp(to_exec5[0], to_exec5);
-    if(fork() == 0)  execvp(to_exec0[0], to_exec0);
+    if(strcmp(argv[1], "CASE1") == 0) {
+        case1();
+    } else if(strcmp(argv[1], "CASE2") == 0) {
+        case2();
+    } else if(strcmp(argv[1], "CASE3") == 0) {
+        case3();
+    } else {
+        puts("WRONG ARGUMENT");
+        return 1;
+    }
 
-    wait(NULL);
-    wait(NULL);
-    wait(NULL);
-    wait(NULL);
-    wait(NULL);
-    wait(NULL);
+
     return 0;
 }
