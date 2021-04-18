@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
     char *file_name = argv[2];
     int n =  strtol(argv[3], NULL, 10);
 
-    FILE *file_d = fopen(file_name, "w+");
+    FILE *file_d = fopen(file_name, "rw+");
     if(file_d < 0) {
         puts("ERROR WHILE OPENING FILE");
         return 2;
@@ -38,41 +38,39 @@ int main(int argc, char **argv) {
         return 2;
     }
 
-    char fill[BUFF_FILL];
-    for(int i = 0; i < BUFF_FILL - 1; i++) {
-        fill[i] = ' ';
-    }
-    fill[BUFF_FILL - 1] = '\n';
-
-
-    int *line_chars = NULL;
-    int lines = 0;
 
     char *data = malloc(sizeof (char) * (n + 1));
     int line;
     while(fread(&line, sizeof(int), 1, fifo_d)) {
         fread(data, sizeof (char), n, fifo_d);
         flock(fileno(file_d), LOCK_EX);
-        if(line > lines) {
-            //printf("%d\n", line);
-            line_chars = realloc(line_chars, line + 1);
-            for(int i = lines + 1; i <= line; i++){
-                line_chars[i] = 4;
-                fseek(file_d, BUFF_FILL * (i - 1), SEEK_SET);
 
+        int cnt = 0;
+        char c;
+        fseek(file_d, 0, SEEK_SET);
+        while(fread(&c, sizeof (char), 1, file_d)) {
+            if (c == '\n') cnt++;
+            if (cnt >= line) {
+                fseek(file_d, -1, SEEK_CUR);
+                char buff[2048];
+                int readed = fread(buff, sizeof(char), 2048, file_d);
+                fseek(file_d, -readed, SEEK_CUR);
+                fwrite(data, sizeof(char), n, file_d);
+                fwrite(buff, sizeof(char), readed, file_d);
+                break;
+            }
+
+        }
+        if(cnt < line) {
+            for(int i = cnt + 1; i <= line; i++) {
                 char str[5];
-                sprintf(str, "%d", i);
-
-                fwrite(fill, sizeof (char ), BUFF_FILL, file_d);
-                fseek(file_d, BUFF_FILL * (i - 1), SEEK_SET);
+                sprintf(str, "%d \n", i);
                 fwrite(str, sizeof (char ), strlen(str), file_d);
             }
-            lines = line;
+            fseek(file_d, -1, SEEK_CUR);
+            fwrite(data, sizeof(char), n, file_d);
+            fwrite("\n", sizeof(char), 1, file_d);
         }
-
-        fseek(file_d, BUFF_FILL * (line - 1) + line_chars[line], SEEK_SET);
-        fwrite(data, sizeof (char), n, file_d);
-        line_chars[line] += n;
 
         flock(fileno(file_d), LOCK_UN);
         //printf("%d %s\n", line, data);
