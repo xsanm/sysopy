@@ -1,0 +1,14 @@
+WNIOSKI
+
+N = 5
+1. wielu producentów, jeden konsument
+    program dziala bezblednie
+2. jeden producenta, wielu konsumentów
+    program dziala bezblednie
+3. wielu producentów, wielu konsumentów
+    program dziala bardzo randomowo - czasem bezblednie, czasem wystepuja niewielkie zmiany (nadpisanie niektorych znakow)
+    najprowdoponiej jest to spowodowane nietypowem dzialaniem funkcji flock()
+
+N > PIPE_BUF
+    dla dowolnej wartosci buforu otrzymalem analagoiczne wartosci jak wyzej
+

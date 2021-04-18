@@ -26,11 +26,6 @@ int main(int argc, char **argv) {
     char *file_name = argv[2];
     int n =  strtol(argv[3], NULL, 10);
 
-    FILE *file_d = fopen(file_name, "rw+");
-    if(file_d < 0) {
-        puts("ERROR WHILE OPENING FILE");
-        return 2;
-    }
 
     FILE *fifo_d = fopen(fifo_name, "r");
     if(fifo_d < 0) {
@@ -42,6 +37,12 @@ int main(int argc, char **argv) {
     char *data = malloc(sizeof (char) * (n + 1));
     int line;
     while(fread(&line, sizeof(int), 1, fifo_d)) {
+        FILE *file_d = fopen(file_name, "rw+");
+        if(file_d < 0) {
+            puts("ERROR WHILE OPENING FILE");
+            return 2;
+        }
+
         fread(data, sizeof (char), n, fifo_d);
         flock(fileno(file_d), LOCK_EX);
 
@@ -52,8 +53,8 @@ int main(int argc, char **argv) {
             if (c == '\n') cnt++;
             if (cnt >= line) {
                 fseek(file_d, -1, SEEK_CUR);
-                char buff[2048];
-                int readed = fread(buff, sizeof(char), 2048, file_d);
+                char buff[4096];
+                int readed = fread(buff, sizeof(char), 4096, file_d);
                 fseek(file_d, -readed, SEEK_CUR);
                 fwrite(data, sizeof(char), n, file_d);
                 fwrite(buff, sizeof(char), readed, file_d);
@@ -73,10 +74,11 @@ int main(int argc, char **argv) {
         }
 
         flock(fileno(file_d), LOCK_UN);
+        fclose(file_d);
         //printf("%d %s\n", line, data);
     }
 
-    fclose(file_d);
+
     fclose(fifo_d);
 
     return 0;

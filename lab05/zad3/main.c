@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    if(mkfifo("FIFO_NAME", 0777) == -1) {
+    if(mkfifo(FIFO_NAME, 0777) == -1) {
         if(errno != EEXIST) {
             puts("ERROR WHILE CREATING FIFO");
             return 1;
