@@ -3,6 +3,8 @@
 int MY_ID;
 
 int server_qid, client_qid;
+int mate_qid;
+int MODE = 0;
 
 void send_message(struct message *msg, int send_to){
     if(msgsnd(send_to, msg, sizeof(struct message) - sizeof (long), 0) == -1){
@@ -28,6 +30,11 @@ void list(struct message *msg) {
     printf("%s", msg->message_text.buff);
 }
 
+void connect(struct message *msg) {
+    printf("CONNECTING WITH %d\n", msg->message_text.client_id);
+    MODE = 1;
+    mate_qid = msg->message_text.qid;
+}
 
 
 void choose_mode(struct message *msg) {
@@ -38,6 +45,12 @@ void choose_mode(struct message *msg) {
             break;
         case LIST:
             list(msg);
+            break;
+        case CONNECT:
+            connect(msg);
+            break;
+        case MESSAGE:
+            printf("[%d] %s", msg->message_text.client_id, msg->message_text.buff);
             break;
         default:
             puts("WRONG MESSAGE TYPE");
@@ -109,16 +122,24 @@ int main(int argc, char ** argv) {
 
     char line[MAX_MESSAGE_LENGTH];
     while (fgets (line, MAX_MESSAGE_LENGTH - 2, stdin)) {
+        if(MODE == 1) {
+            struct message_text mtext;
+            mtext.qid = client_qid;
+            mtext.client_id = MY_ID;
+            memcpy(mtext.buff, line, sizeof line);
+            struct message msg;
+            msg.message_type = MESSAGE;
+            msg.message_text = mtext;
+            send_message(&msg, mate_qid);
+        }
         if (strlen(line) >= 9) {
-            char subbuff[10];
-            memcpy(subbuff, line, 8);
-            subbuff[8] = '\0';
-            printf("%s\n", subbuff);
-            if (strcmp(subbuff, "CONNECT ") == 0) {
+            char *pch;
+            pch = strstr (line,"CONNECT ");
+            if (pch != NULL) {
                 struct message_text mtext;
                 mtext.qid = client_qid;
                 mtext.client_id = MY_ID;
-                memcpy(mtext.buff, &line[8], strlen(line) - 8);
+                memcpy(mtext.buff, line, sizeof line);
                 struct message msg;
                 msg.message_type = CONNECT;
                 msg.message_text = mtext;

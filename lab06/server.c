@@ -32,6 +32,9 @@ void init(struct message *msg) {
     response.sender_pid = getpid();
     response.message_text = mtext;
     send_message(&response, clients[is].queue_id);
+
+
+
 }
 
 void list(struct message *msg) {
@@ -62,11 +65,49 @@ void list(struct message *msg) {
 void connect(struct message *msg) {
     puts("CONNECT QUERY");
     int id = 0;
-    for (int i = 0; i < strlen(msg->message_text.buff); i++) {
+    //printf("%s", msg->message_text.buff);
+    for (int i = 8; i < strlen(msg->message_text.buff) - 1; i++) {
         id *= 10;
         id += (msg->message_text.buff[i] - '0');
+        //printf("%d\n", msg->message_text.buff[i] - '0');
     }
     printf("ID %d\n", id);
+    if(id < 0 || id >= MAX_CLIENTS) {
+        puts("WRONG ID");
+        return;
+    }
+    if(clients[id].IS_CONNECTED == 0) {
+        puts("Client with given ID not connected");
+        return;
+    }
+    if(clients[id].IS_BUSY == 1) {
+        puts("Client with given ID not available");
+        return;
+    }
+
+    struct message_text mtext1;
+    mtext1.qid = msg->message_text.qid;
+    mtext1.client_id = msg->message_text.client_id;
+    struct message msg1;
+    msg1.message_type = CONNECT;
+    msg1.message_text = mtext1;
+
+    send_message(&msg1, clients[id].queue_id);
+
+    struct message_text mtext2;
+    mtext2.qid = clients[id].queue_id;
+    mtext2.client_id = id;
+    struct message msg2;
+    msg2.message_type = CONNECT;
+    msg2.message_text = mtext2;
+
+    send_message(&msg2, msg->message_text.qid);
+
+    clients[id].IS_BUSY = 1;
+    clients[msg->message_text.client_id].IS_BUSY = 1;
+
+    //zmienic flagi
+
 }
 
 
