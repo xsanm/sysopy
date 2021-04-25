@@ -115,6 +115,7 @@ void connect(struct message *msg) {
 }
 
 void disconnect(struct message *msg) {
+    puts("DISCONNECT QUERY");
     int id1 = msg->message_text.client_id;
     int id2 = clients[id1].mate_id;
 
@@ -131,6 +132,12 @@ void disconnect(struct message *msg) {
 
 }
 
+void stop(struct message *msg) {
+    puts("STOP QUERY");
+    clients[msg->message_text.client_id].IS_BUSY = 0;
+    clients[msg->message_text.client_id].IS_CONNECTED = 0;
+}
+
 
 void choose_mode(struct message *msg) {
     switch (msg->message_type) {
@@ -145,6 +152,9 @@ void choose_mode(struct message *msg) {
             break;
             case DISCONNECT:
             disconnect(msg);
+            break;
+        case STOP:
+            stop(msg);
             break;
         default:
             puts("WRONG MESSAGE TYPE");

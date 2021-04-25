@@ -87,8 +87,22 @@ void deamon() {
     timer_settime(timer, 0, &timer_value, NULL);
 }
 
+void sigint_handler() {
+    struct message_text mtxt;
+    mtxt.qid = client_qid;
+    mtxt.client_id = MY_ID;
+    struct message msg;
+    msg.message_text = mtxt;
+    msg.message_type = STOP;
+    send_message(&msg, server_qid);
+    msgctl(client_qid, IPC_RMID, NULL);
+    exit(0);
+}
 
 int main(int argc, char ** argv) {
+
+
+
     key_t server_key, client_key;
     //int server_qid, client_qid;
 
@@ -117,7 +131,9 @@ int main(int argc, char ** argv) {
         exit (1);
     }
 
-    printf("server_qid: %d\n", server_qid);
+    //printf("server_qid: %d\n", server_qid);
+
+    signal(SIGINT, sigint_handler);
 
     my_message.message_type = MESSAGE;
     my_message.message_text.qid = client_qid;
@@ -173,6 +189,17 @@ int main(int argc, char ** argv) {
             msg.message_text = mtxt;
             msg.message_type = LIST;
             send_message(&msg, server_qid);
+        } else if (strcmp(line, "STOP\n") == 0) {
+
+            struct message_text mtxt;
+            mtxt.qid = client_qid;
+            mtxt.client_id = MY_ID;
+            struct message msg;
+            msg.message_text = mtxt;
+            msg.message_type = STOP;
+            send_message(&msg, server_qid);
+            msgctl(client_qid, IPC_RMID, NULL);
+            exit(0);
         }
 
 
