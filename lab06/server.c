@@ -58,6 +58,15 @@ void list(struct message *msg) {
     send_message(&response, msg->message_text.qid);
 
 }
+void connect(struct message *msg) {
+    puts("CONNECT QUERY");
+    int id = 0;
+    for (int i = 0; i < strlen(msg->message_text.buff); i++) {
+        id *= 10;
+        id += (msg->message_text.buff[i] - '0');
+    }
+    printf("ID %d\n", id);
+}
 
 
 void choose_mode(struct message *msg) {
@@ -67,6 +76,9 @@ void choose_mode(struct message *msg) {
             break;
         case LIST:
             list(msg);
+            break;
+        case CONNECT:
+            connect(msg);
             break;
         default:
             puts("WRONG MESSAGE TYPE");

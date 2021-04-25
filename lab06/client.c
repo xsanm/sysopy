@@ -2,6 +2,8 @@
 
 int MY_ID;
 
+int server_qid, client_qid;
+
 void send_message(struct message *msg, int send_to){
     if(msgsnd(send_to, msg, sizeof(struct message), 0) == -1){
         puts("ERROR");
@@ -40,13 +42,45 @@ void choose_mode(struct message *msg) {
         default:
             puts("WRONG MESSAGE TYPE");
     }
+    printf("CO DO CHUJA\n");
+}
 
+void get_response(union sigval sv) {
+    (void)sv;
+    struct message return_message;
+
+    while (msgrcv(client_qid, &return_message, 256, -7L, IPC_NOWAIT) != -1) {
+        printf("ELO\n");
+        printf("%ld\n", return_message.message_type);
+        //choose_mode(&return_message);
+        printf("ELO");
+        sleep(1);
+    }
+    /*if (msgrcv (client_qid, &return_message, sizeof (struct message), 0, 0) == -1) {
+        perror ("client: msgrcv #####");
+        //exit (1);
+    }*/
+
+}
+
+
+void deamon() {
+    timer_t timer;
+    struct sigevent event;
+    event.sigev_notify = SIGEV_THREAD;
+    event.sigev_notify_function = get_response;
+    event.sigev_notify_attributes = NULL;
+    event.sigev_value.sival_ptr = NULL;
+    timer_create(CLOCK_REALTIME, &event, &timer);
+    struct timespec ten_ms = {0, 10000000};
+    struct itimerspec timer_value = {ten_ms, ten_ms};
+    timer_settime(timer, 0, &timer_value, NULL);
 }
 
 
 int main(int argc, char ** argv) {
     key_t server_key, client_key;
-    int server_qid, client_qid;
+    //int server_qid, client_qid;
 
     struct message my_message, return_message;
 
@@ -83,17 +117,40 @@ int main(int argc, char ** argv) {
 
     //printf ("Please type a message: ");
 
+    deamon();
+
+    puts("SIEMA");
     char line[MAX_MESSAGE_LENGTH];
+    sleep(5);
+    //while (1);
+    /*while (fgets (line, MAX_MESSAGE_LENGTH - 2, stdin)) {
 
-    while (1) {
-
-        if (msgrcv (client_qid, &return_message, sizeof (struct message), 0, 0) == -1) {
+        /*if (msgrcv (client_qid, &return_message, sizeof (struct message), 0, 0) == -1) {
             perror ("client: msgrcv #####");
             exit (1);
         }
         choose_mode(&return_message);
+        fflush( stdout );*/
+/*
+            //printf("%s\n", line);
+            if(strlen(line) >= 9) {
+                char subbuff[10];
+                memcpy(subbuff, line, 8);
+                subbuff[8] = '\0';
+                printf("%s\n", subbuff);
+                if (strcmp(subbuff, "CONNECT ") == 0) {
+                    struct message_text mtext;
+                    mtext.qid = client_qid;
+                    mtext.client_id = MY_ID;
+                    memcpy(mtext.buff, &line[8], strlen(line) - 8);
+                    struct message msg;
+                    msg.message_type = CONNECT;
+                    msg.message_text = mtext;
 
-        if(fgets (line, MAX_MESSAGE_LENGTH - 1, stdin)) {
+                    send_message(&msg, server_qid);
+                }
+            }
+
             if(strcmp(line, "LIST\n") == 0) {
                 struct message_text mtxt;
                 mtxt.qid = client_qid;
@@ -103,18 +160,21 @@ int main(int argc, char ** argv) {
                 msg.message_type = LIST;
                 send_message(&msg, server_qid);
             }
+
+
             int length = strlen(line);
             if (line[length - 1] == '\n') line[length - 1] = '\0';
 
             printf("%s\n", line);
 
 
-        }
+
+
         //sending
         /*if (msgsnd (server_qid, &my_message, sizeof (struct message_text), 0) == -1) {
             perror ("sending error");
             exit (1);
-        }*/
+        }
 
         //recieving
 
@@ -128,7 +188,7 @@ int main(int argc, char ** argv) {
         perror ("client: msgctl");
         exit (1);
     }
-    printf ("Client: bye\n");
+    printf ("Client: bye\n");*/
 
     return 0;
 }
