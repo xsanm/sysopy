@@ -1,34 +1,39 @@
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/msg.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <unistd.h>
+#include "data.h"
 
-#define PROJECT_ID 'P'
-#define Q_PERM 0660
-#define MAX_CLIENTS  116
-#define MAX_MESSAGE_LENGTH 256
-#define HOME getenv("HOME")
+int MY_ID;
 
-#define STOP 1
-#define DISCONNECT 2
-#define LIST 3
-#define CONNECT 4
-#define INIT 5
-#define MESSAGE 6
+void send_message(struct message *msg, int send_to){
+    if(msgsnd(send_to, msg, sizeof(struct message), 0) == -1){
+        puts("ERROR");
+    }
+}
 
-struct message_text {
-    int qid;
-    char buf [256];
-};
+void init(int server_qid, int client_qid) {
+    puts("INIT");
+    struct message_text mtext;
+    mtext.qid = client_qid;
 
-struct message {
-    long message_type;
-    struct  message_text mess_t;
-};
+    struct message msg;
+    msg.message_type = INIT;
+    msg.sender_pid = getpid();
+    msg.message_text = mtext;
+
+    send_message(&msg, server_qid);
+}
+
+
+
+void choose_mode(struct message *msg) {
+    switch (msg->message_type) {
+        case INIT:
+            MY_ID = msg->message_text.client_id;
+            printf("INITED. My id is: %d\n", MY_ID);
+            break;
+        default:
+            puts("WRONG MESSAGE TYPE");
+    }
+
+}
 
 
 int main(int argc, char ** argv) {
@@ -63,14 +68,25 @@ int main(int argc, char ** argv) {
     printf("server_qid: %d\n", server_qid);
 
     my_message.message_type = MESSAGE;
-    my_message.mess_t.qid = client_qid;
+    my_message.message_text.qid = client_qid;
+
+    init(server_qid, client_qid);
+
 
     printf ("Please type a message: ");
 
-    while (fgets (my_message.mess_t.buf, 128, stdin)) {
-        int length = strlen (my_message.mess_t.buf);
-        if (my_message.mess_t.buf [length - 1] == '\n')
-            my_message.mess_t.buf [length - 1] = '\0';
+    while (1) {
+
+        if (msgrcv (client_qid, &return_message, sizeof (struct message), 0, 0) == -1) {
+            perror ("client: msgrcv #####");
+            exit (1);
+        }
+        choose_mode(&return_message);
+
+        fgets (my_message.message_text.buff, 128, stdin);
+        int length = strlen (my_message.message_text.buff);
+        if (my_message.message_text.buff [length - 1] == '\n')
+            my_message.message_text.buff [length - 1] = '\0';
 
         //sending
         if (msgsnd (server_qid, &my_message, sizeof (struct message_text), 0) == -1) {
@@ -79,11 +95,8 @@ int main(int argc, char ** argv) {
         }
 
         //recieving
-        if (msgrcv (client_qid, &return_message, sizeof (struct message_text), 0, 0) == -1) {
-            perror ("client: msgrcv");
-            exit (1);
-        }
-        printf ("Message received from server: %s\n\n", return_message.mess_t.buf);
+
+        //printf ("Message received from server: %s\n\n", return_message.message_text.buff);
 
         printf ("Please type a message: ");
     }
