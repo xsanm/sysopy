@@ -34,8 +34,6 @@ void init(struct message *msg) {
     response.message_text = mtext;
     send_message(&response, clients[is].queue_id);
 
-
-
 }
 
 void list(struct message *msg) {
@@ -60,7 +58,6 @@ void list(struct message *msg) {
     struct message response;
     response.message_text = mtext;
     response.message_type = LIST;
-    //TODFO check id
     send_message(&response, msg->message_text.qid);
 }
 
@@ -110,8 +107,6 @@ void connect(struct message *msg) {
 
     clients[id].mate_id = msg->message_text.client_id;
     clients[msg->message_text.client_id].mate_id = id;
-
-    //zmienic flagi
 
 }
 
@@ -176,18 +171,12 @@ void sigint_handler() {
 
 int main(int argc, char ** argv) {
 
-
     for(int i = 0; i < MAX_CLIENTS; i++){
         clients[i].IS_CONNECTED = 0;
         clients[i].IS_BUSY = 0;
     }
 
-
-
     key_t msg_queue_key;
-
-
-
 
     //server queue
     if((msg_queue_key = ftok(HOME, PROJECT_ID)) == -1) {
@@ -214,10 +203,7 @@ int main(int argc, char ** argv) {
         }
         puts("Message recieved");
         choose_mode(&mess);
-
     }
 
-
-    return 0;
 }
 

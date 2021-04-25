@@ -146,9 +146,7 @@ int main(int argc, char ** argv) {
 
     init(server_qid, client_qid);
 
-
     deamon();
-
 
     char line[MAX_MESSAGE_LENGTH];
     while (fgets (line, MAX_MESSAGE_LENGTH - 2, stdin)) {
@@ -208,35 +206,10 @@ int main(int argc, char ** argv) {
             exit(0);
         }
 
-
         int length = strlen(line);
         if (line[length - 1] == '\n') line[length - 1] = '\0';
 
-        //printf("%s\n", line);
-
-
     }
-
-
-        //sending
-        /*if (msgsnd (server_qid, &my_message, sizeof (struct message_text), 0) == -1) {
-            perror ("sending error");
-            exit (1);
-        }
-
-        //recieving
-
-        //printf ("Message received from server: %s\n\n", return_message.message_text.buff);
-
-        printf ("Please type a message: ");
-    }
-
-    // remove message queue
-    if (msgctl (client_qid, IPC_RMID, NULL) == -1) {
-        perror ("client: msgctl");
-        exit (1);
-    }
-    printf ("Client: bye\n");*/
 
     return 0;
 }
