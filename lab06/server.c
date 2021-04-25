@@ -37,6 +37,8 @@ void init(struct message *msg) {
 void list(struct message *msg) {
     puts("LIST QUERY");
     struct message_text mtext;
+    mtext.buff[0] ='\0';
+    //printf("%d\n", strlen(mtext.buff));
     strcat(mtext.buff, "LIST OF CLIENTS\n");
     for(int i = 0; i < MAX_CLIENTS; i++) {
         if(clients[i].IS_CONNECTED == 1) {
@@ -47,7 +49,7 @@ void list(struct message *msg) {
             if(clients[i].IS_BUSY) {
                 strcat(mtext.buff, " NOT AVAILABLE\n");
             } else {
-                strcat(mtext.buff, " AVAILABLE\n");
+                strcat(mtext.buff, " AVAILABLE\n\0");
             }
         }
     }
@@ -56,7 +58,6 @@ void list(struct message *msg) {
     response.message_type = LIST;
     //TODFO check id
     send_message(&response, msg->message_text.qid);
-
 }
 void connect(struct message *msg) {
     puts("CONNECT QUERY");

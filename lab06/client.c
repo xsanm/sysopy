@@ -42,28 +42,14 @@ void choose_mode(struct message *msg) {
         default:
             puts("WRONG MESSAGE TYPE");
     }
-    printf("CO DO CHUJA\n");
 }
 
 void get_response(union sigval sv) {
     (void)sv;
     struct message return_message;
-    //puts("RESPONSE");
-    //printf("%lu %lu %lu %lu\n",  sizeof (struct message), sizeof (int), sizeof (long), sizeof (pid_t));
     while (msgrcv(client_qid, &return_message, sizeof(struct message) - sizeof (long), 0, IPC_NOWAIT) != -1) {
-        //printf("ELO\n");
-        //printf("%ld\n", return_message.message_type);
         choose_mode(&return_message);
-        //printf("ELO");
-        //sleep(1);
     }
-    //perror("client: msgrcv #####");
-    //exit(1);
-    /*if (msgrcv (client_qid, &return_message, sizeof (struct message), 0, 0) == -1) {
-        perror ("client: msgrcv #####");
-        //exit (1);
-    }*/
-
 }
 
 
@@ -118,31 +104,11 @@ int main(int argc, char ** argv) {
     init(server_qid, client_qid);
 
 
-    //printf ("Please type a message: ");
-
     deamon();
-    //while(1);
+
+
     char line[MAX_MESSAGE_LENGTH];
-    //sleep(5);
-    /*while(1) {
-        if (msgrcv (client_qid, &return_message, sizeof (struct message) - 4, 0, 0) == -1) {
-            perror("client: msgrcv #####");
-            exit(1);
-        }
-        printf("%ld\n", return_message.message_type);
-    }
-    //while (1);*/
     while (fgets (line, MAX_MESSAGE_LENGTH - 2, stdin)) {
-
-        /*if (msgrcv (client_qid, &return_message, sizeof (struct message), 0, 0) == -1) {
-            perror ("
-            client: msgrcv #####");
-            exit (1);
-        }
-        choose_mode(&return_message);
-        fflush( stdout );*/
-
-        //printf("%s\n", line);
         if (strlen(line) >= 9) {
             char subbuff[10];
             memcpy(subbuff, line, 8);
@@ -175,7 +141,7 @@ int main(int argc, char ** argv) {
         int length = strlen(line);
         if (line[length - 1] == '\n') line[length - 1] = '\0';
 
-        printf("%s\n", line);
+        //printf("%s\n", line);
 
 
     }
