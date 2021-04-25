@@ -36,6 +36,11 @@ void connect(struct message *msg) {
     mate_qid = msg->message_text.qid;
 }
 
+void disconnect(struct message *msg) {
+    printf("DISCONNECTED\n");
+    MODE = 0;
+}
+
 
 void choose_mode(struct message *msg) {
     switch (msg->message_type) {
@@ -49,8 +54,11 @@ void choose_mode(struct message *msg) {
         case CONNECT:
             connect(msg);
             break;
+        case DISCONNECT:
+            disconnect(msg);
+            break;
         case MESSAGE:
-            printf("[%d] %s", msg->message_text.client_id, msg->message_text.buff);
+            printf("[MSG FROM %d] %s", msg->message_text.client_id, msg->message_text.buff);
             break;
         default:
             puts("WRONG MESSAGE TYPE");
@@ -123,14 +131,23 @@ int main(int argc, char ** argv) {
     char line[MAX_MESSAGE_LENGTH];
     while (fgets (line, MAX_MESSAGE_LENGTH - 2, stdin)) {
         if(MODE == 1) {
-            struct message_text mtext;
-            mtext.qid = client_qid;
-            mtext.client_id = MY_ID;
-            memcpy(mtext.buff, line, sizeof line);
-            struct message msg;
-            msg.message_type = MESSAGE;
-            msg.message_text = mtext;
-            send_message(&msg, mate_qid);
+            if(strcmp(line, "DISCONNECT\n")) {
+                struct message_text mtext;
+                mtext.qid = client_qid;
+                mtext.client_id = MY_ID;
+                memcpy(mtext.buff, line, sizeof line);
+                struct message msg;
+                msg.message_type = MESSAGE;
+                msg.message_text = mtext;
+                send_message(&msg, mate_qid);
+            } else {
+                struct message_text mtext;
+                mtext.client_id = MY_ID;
+                struct message msg;
+                msg.message_type = DISCONNECT;
+                msg.message_text = mtext;
+                send_message(&msg, server_qid);
+            }
         }
         if (strlen(line) >= 9) {
             char *pch;

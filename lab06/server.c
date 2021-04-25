@@ -62,6 +62,7 @@ void list(struct message *msg) {
     //TODFO check id
     send_message(&response, msg->message_text.qid);
 }
+
 void connect(struct message *msg) {
     puts("CONNECT QUERY");
     int id = 0;
@@ -106,7 +107,27 @@ void connect(struct message *msg) {
     clients[id].IS_BUSY = 1;
     clients[msg->message_text.client_id].IS_BUSY = 1;
 
+    clients[id].mate_id = msg->message_text.client_id;
+    clients[msg->message_text.client_id].mate_id = id;
+
     //zmienic flagi
+
+}
+
+void disconnect(struct message *msg) {
+    int id1 = msg->message_text.client_id;
+    int id2 = clients[id1].mate_id;
+
+    clients[id1].IS_BUSY = 0;
+    clients[id2].IS_BUSY = 0;
+
+    struct message msg1;
+    msg1.message_type = DISCONNECT;
+    send_message(&msg1, clients[id1].queue_id);
+
+    struct message msg2;
+    msg2.message_type = DISCONNECT;
+    send_message(&msg2, clients[id2].queue_id);
 
 }
 
@@ -121,6 +142,9 @@ void choose_mode(struct message *msg) {
             break;
         case CONNECT:
             connect(msg);
+            break;
+            case DISCONNECT:
+            disconnect(msg);
             break;
         default:
             puts("WRONG MESSAGE TYPE");

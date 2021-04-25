@@ -39,4 +39,5 @@ struct client {
     int queue_id;
     int IS_CONNECTED;
     int IS_BUSY; //1 - not available
+    int mate_id;
 };
