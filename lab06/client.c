@@ -21,6 +21,11 @@ void init(int server_qid, int client_qid) {
     send_message(&msg, server_qid);
 }
 
+void list(struct message *msg) {
+    puts("Reciving list");
+    printf("%s", msg->message_text.buff);
+}
+
 
 
 void choose_mode(struct message *msg) {
@@ -28,6 +33,9 @@ void choose_mode(struct message *msg) {
         case INIT:
             MY_ID = msg->message_text.client_id;
             printf("INITED. My id is: %d\n", MY_ID);
+            break;
+        case LIST:
+            list(msg);
             break;
         default:
             puts("WRONG MESSAGE TYPE");
@@ -73,7 +81,9 @@ int main(int argc, char ** argv) {
     init(server_qid, client_qid);
 
 
-    printf ("Please type a message: ");
+    //printf ("Please type a message: ");
+
+    char line[MAX_MESSAGE_LENGTH];
 
     while (1) {
 
@@ -83,16 +93,28 @@ int main(int argc, char ** argv) {
         }
         choose_mode(&return_message);
 
-        fgets (my_message.message_text.buff, 128, stdin);
-        int length = strlen (my_message.message_text.buff);
-        if (my_message.message_text.buff [length - 1] == '\n')
-            my_message.message_text.buff [length - 1] = '\0';
+        if(fgets (line, MAX_MESSAGE_LENGTH - 1, stdin)) {
+            if(strcmp(line, "LIST\n") == 0) {
+                struct message_text mtxt;
+                mtxt.qid = client_qid;
+                mtxt.client_id = MY_ID;
+                struct message msg;
+                msg.message_text = mtxt;
+                msg.message_type = LIST;
+                send_message(&msg, server_qid);
+            }
+            int length = strlen(line);
+            if (line[length - 1] == '\n') line[length - 1] = '\0';
 
+            printf("%s\n", line);
+
+
+        }
         //sending
-        if (msgsnd (server_qid, &my_message, sizeof (struct message_text), 0) == -1) {
+        /*if (msgsnd (server_qid, &my_message, sizeof (struct message_text), 0) == -1) {
             perror ("sending error");
             exit (1);
-        }
+        }*/
 
         //recieving
 

@@ -34,11 +34,39 @@ void init(struct message *msg) {
     send_message(&response, clients[is].queue_id);
 }
 
+void list(struct message *msg) {
+    puts("LIST QUERY");
+    struct message_text mtext;
+    strcat(mtext.buff, "LIST OF CLIENTS\n");
+    for(int i = 0; i < MAX_CLIENTS; i++) {
+        if(clients[i].IS_CONNECTED == 1) {
+            strcat(mtext.buff, "Client id: ");
+            char str[10];
+            sprintf(str, "%d", i);
+            strcat(mtext.buff, str);
+            if(clients[i].IS_BUSY) {
+                strcat(mtext.buff, " NOT AVAILABLE\n");
+            } else {
+                strcat(mtext.buff, " AVAILABLE\n");
+            }
+        }
+    }
+    struct message response;
+    response.message_text = mtext;
+    response.message_type = LIST;
+    //TODFO check id
+    send_message(&response, msg->message_text.qid);
+
+}
+
 
 void choose_mode(struct message *msg) {
     switch (msg->message_type) {
         case INIT:
             init(msg);
+            break;
+        case LIST:
+            list(msg);
             break;
         default:
             puts("WRONG MESSAGE TYPE");
@@ -52,7 +80,7 @@ int main(int argc, char ** argv) {
         clients[i].IS_CONNECTED = 0;
         clients[i].IS_BUSY = 0;
     }
-    
+
 
     key_t msg_queue_key;
     int qid;
@@ -84,22 +112,6 @@ int main(int argc, char ** argv) {
         }
         puts("Message recieved");
         choose_mode(&mess);
-
-        /*int length = strlen (mess.message_text.buff);
-        char buf [20];
-        sprintf (buf, " %d", length);
-        strcat (mess.message_text.buff, buf);
-
-        int client_qid = mess.message_text.qid;
-        mess.message_text.qid = qid;
-
-        //sending reply
-        if (msgsnd (client_qid, &mess, sizeof (struct message_text), 0) == -1) {
-            perror ("msgget");
-            exit (1);
-        }
-
-        printf ("Server: response sent to client.\n");*/
 
     }
 
