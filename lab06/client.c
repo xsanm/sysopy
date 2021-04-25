@@ -41,6 +41,19 @@ void disconnect(struct message *msg) {
     MODE = 0;
 }
 
+void sigint_handler() {
+    struct message_text mtxt;
+    mtxt.qid = client_qid;
+    mtxt.client_id = MY_ID;
+    struct message msg;
+    msg.message_text = mtxt;
+    msg.message_type = STOP;
+    send_message(&msg, server_qid);
+    msgctl(client_qid, IPC_RMID, NULL);
+    exit(0);
+}
+
+
 
 void choose_mode(struct message *msg) {
     switch (msg->message_type) {
@@ -56,6 +69,10 @@ void choose_mode(struct message *msg) {
             break;
         case DISCONNECT:
             disconnect(msg);
+            break;
+        case STOP:
+            msgctl(client_qid, IPC_RMID, NULL);
+            exit(0);
             break;
         case MESSAGE:
             printf("[MSG FROM %d] %s", msg->message_text.client_id, msg->message_text.buff);
@@ -87,17 +104,6 @@ void deamon() {
     timer_settime(timer, 0, &timer_value, NULL);
 }
 
-void sigint_handler() {
-    struct message_text mtxt;
-    mtxt.qid = client_qid;
-    mtxt.client_id = MY_ID;
-    struct message msg;
-    msg.message_text = mtxt;
-    msg.message_type = STOP;
-    send_message(&msg, server_qid);
-    msgctl(client_qid, IPC_RMID, NULL);
-    exit(0);
-}
 
 int main(int argc, char ** argv) {
 

@@ -1,6 +1,7 @@
 #include "data.h"
 
 struct client clients[MAX_CLIENTS];
+int qid;
 
 void send_message(struct message *msg, int send_to){
     if(msgsnd(send_to, msg, sizeof(struct message) - sizeof (long), 0) == -1){
@@ -161,6 +162,18 @@ void choose_mode(struct message *msg) {
     }
 }
 
+void sigint_handler() {
+    for(int i = 0; i < MAX_CLIENTS; i++) {
+        if(clients[i].IS_CONNECTED) {
+            struct message msg;
+            msg.message_type = STOP;
+            send_message(&msg, clients[i].queue_id);
+        }
+    }
+    msgctl(qid, IPC_RMID, NULL);
+    exit(0);
+}
+
 int main(int argc, char ** argv) {
 
 
@@ -170,8 +183,9 @@ int main(int argc, char ** argv) {
     }
 
 
+
     key_t msg_queue_key;
-    int qid;
+
 
 
 
@@ -187,7 +201,7 @@ int main(int argc, char ** argv) {
     }
 
     //printf("qid: %d\n", qid);
-
+    signal(SIGINT, sigint_handler);
     puts("SERVER....");
 
     struct message mess;
