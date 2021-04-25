@@ -3,7 +3,7 @@
 struct client clients[MAX_CLIENTS];
 
 void send_message(struct message *msg, int send_to){
-    if(msgsnd(send_to, msg, sizeof(struct message), 0) == -1){
+    if(msgsnd(send_to, msg, sizeof(struct message) - sizeof (long), 0) == -1){
         puts("ERROR");
     }
 }

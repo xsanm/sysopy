@@ -5,7 +5,7 @@ int MY_ID;
 int server_qid, client_qid;
 
 void send_message(struct message *msg, int send_to){
-    if(msgsnd(send_to, msg, sizeof(struct message), 0) == -1){
+    if(msgsnd(send_to, msg, sizeof(struct message) - sizeof (long), 0) == -1){
         puts("ERROR");
     }
 }
@@ -48,14 +48,17 @@ void choose_mode(struct message *msg) {
 void get_response(union sigval sv) {
     (void)sv;
     struct message return_message;
-
-    while (msgrcv(client_qid, &return_message, 256, -7L, IPC_NOWAIT) != -1) {
-        printf("ELO\n");
-        printf("%ld\n", return_message.message_type);
-        //choose_mode(&return_message);
-        printf("ELO");
-        sleep(1);
+    //puts("RESPONSE");
+    //printf("%lu %lu %lu %lu\n",  sizeof (struct message), sizeof (int), sizeof (long), sizeof (pid_t));
+    while (msgrcv(client_qid, &return_message, sizeof(struct message) - sizeof (long), 0, IPC_NOWAIT) != -1) {
+        //printf("ELO\n");
+        //printf("%ld\n", return_message.message_type);
+        choose_mode(&return_message);
+        //printf("ELO");
+        //sleep(1);
     }
+    //perror("client: msgrcv #####");
+    //exit(1);
     /*if (msgrcv (client_qid, &return_message, sizeof (struct message), 0, 0) == -1) {
         perror ("client: msgrcv #####");
         //exit (1);
@@ -118,56 +121,64 @@ int main(int argc, char ** argv) {
     //printf ("Please type a message: ");
 
     deamon();
-
-    puts("SIEMA");
+    //while(1);
     char line[MAX_MESSAGE_LENGTH];
-    sleep(5);
-    //while (1);
-    /*while (fgets (line, MAX_MESSAGE_LENGTH - 2, stdin)) {
+    //sleep(5);
+    /*while(1) {
+        if (msgrcv (client_qid, &return_message, sizeof (struct message) - 4, 0, 0) == -1) {
+            perror("client: msgrcv #####");
+            exit(1);
+        }
+        printf("%ld\n", return_message.message_type);
+    }
+    //while (1);*/
+    while (fgets (line, MAX_MESSAGE_LENGTH - 2, stdin)) {
 
         /*if (msgrcv (client_qid, &return_message, sizeof (struct message), 0, 0) == -1) {
-            perror ("client: msgrcv #####");
+            perror ("
+            client: msgrcv #####");
             exit (1);
         }
         choose_mode(&return_message);
         fflush( stdout );*/
-/*
-            //printf("%s\n", line);
-            if(strlen(line) >= 9) {
-                char subbuff[10];
-                memcpy(subbuff, line, 8);
-                subbuff[8] = '\0';
-                printf("%s\n", subbuff);
-                if (strcmp(subbuff, "CONNECT ") == 0) {
-                    struct message_text mtext;
-                    mtext.qid = client_qid;
-                    mtext.client_id = MY_ID;
-                    memcpy(mtext.buff, &line[8], strlen(line) - 8);
-                    struct message msg;
-                    msg.message_type = CONNECT;
-                    msg.message_text = mtext;
 
-                    send_message(&msg, server_qid);
-                }
-            }
-
-            if(strcmp(line, "LIST\n") == 0) {
-                struct message_text mtxt;
-                mtxt.qid = client_qid;
-                mtxt.client_id = MY_ID;
+        //printf("%s\n", line);
+        if (strlen(line) >= 9) {
+            char subbuff[10];
+            memcpy(subbuff, line, 8);
+            subbuff[8] = '\0';
+            printf("%s\n", subbuff);
+            if (strcmp(subbuff, "CONNECT ") == 0) {
+                struct message_text mtext;
+                mtext.qid = client_qid;
+                mtext.client_id = MY_ID;
+                memcpy(mtext.buff, &line[8], strlen(line) - 8);
                 struct message msg;
-                msg.message_text = mtxt;
-                msg.message_type = LIST;
+                msg.message_type = CONNECT;
+                msg.message_text = mtext;
+
                 send_message(&msg, server_qid);
             }
+        }
+
+        if (strcmp(line, "LIST\n") == 0) {
+            struct message_text mtxt;
+            mtxt.qid = client_qid;
+            mtxt.client_id = MY_ID;
+            struct message msg;
+            msg.message_text = mtxt;
+            msg.message_type = LIST;
+            send_message(&msg, server_qid);
+        }
 
 
-            int length = strlen(line);
-            if (line[length - 1] == '\n') line[length - 1] = '\0';
+        int length = strlen(line);
+        if (line[length - 1] == '\n') line[length - 1] = '\0';
 
-            printf("%s\n", line);
+        printf("%s\n", line);
 
 
+    }
 
 
         //sending
