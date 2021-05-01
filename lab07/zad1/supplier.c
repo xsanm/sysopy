@@ -70,22 +70,24 @@ int main(int argc, char **argv) {
 
 
     while(1) {
+        usleep(rand_time);
         sops_table->sem_op = -1;
         if (semop(semid, sops_table, 1) == -1) {
             perror("semop");
             exit(1);
         }
         if(table_block->pizzas > 0) {
-            printf("[%d] [%d] [%s]\n", ID, getpid(), timestamp());
+            printf("S [%d] [%d] [%s]\n", ID, getpid(), timestamp());
             printf("biore pizze: %d, liczba pizz na stole: %d\n", table_block->pizza_boxes[table_block->box_to_pick], table_block->pizzas--);
             table_block->pizza_boxes[table_block->box_to_pick++] = -1;
+            table_block->box_to_pick %= TABLE_SIZE;
             sops_table->sem_op = 1;
             if (semop(semid, sops_table, 1) == -1) {
                 perror("semop");
                 exit(1);
             }
             sleep(5);
-            printf("[%d] [%d] [%s]\n", ID, getpid(), timestamp());
+            printf("S [%d] [%d] [%s]\n", ID, getpid(), timestamp());
             printf("Dostarczam\n");
             sleep(5);
         } else {

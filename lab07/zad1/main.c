@@ -78,6 +78,7 @@ void destroy_mem_block(char *fname) {
 
 void run_pizzeria(int cooks_number, int supplier_number) {
     for (int i = 0; i < cooks_number; i++) {
+        usleep(rand_time * 2);
         pid_t child_pid = fork();
         char snum[5];
         sprintf(snum, "%d", i + 1);
@@ -87,6 +88,7 @@ void run_pizzeria(int cooks_number, int supplier_number) {
     }
 
     for (int i = 0; i < supplier_number; i++) {
+        usleep(rand_time);
         pid_t child_pid = fork();
         char snum[5];
         sprintf(snum, "%d", i + 1);
@@ -101,6 +103,7 @@ void run_pizzeria(int cooks_number, int supplier_number) {
 
 
 int main(int argc, char **argv) {
+    srand(time(NULL));
     if(argc != 3) {
         puts("WRONG NUMBER OF ARGUMENTS");
         return 1;

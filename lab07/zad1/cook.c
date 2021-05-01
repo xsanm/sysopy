@@ -40,17 +40,22 @@ char * timestamp(){
     return time;
 }
 
+void diplay_info(int ID) {
+    //printf("C [%d] [%d] [%s]\n", ID, getpid(), timestamp());
+}
+
+
 int main(int argc, char **argv) {
     if(argc != 2) {
         puts("WRONG NUMBER OF ARGUMENTS");
         return 1;
     }
 
-    srand(time(0));
+    srand(time(NULL) ^ (getpid()<<16));
 
     int ID = strtol (argv[1], NULL, 10);
-    printf("COOK [%d] hired, PID [%d]\n", ID, getpid());
 
+    printf("COOK [%d] hired, PID [%d]\n", ID, getpid());
 
     struct bake *bake_block = (struct bake *)add_mem_block(BAKE_FNAME, BAKE_ID, BLOCK_SIZE);
     if(bake_block == NULL) {
@@ -98,10 +103,11 @@ int main(int argc, char **argv) {
 
 
     while(1) {
-
+        usleep(rand_time);
         int pizza_type = get_random(0, 9);
         int shelf_id;
-        printf("[%d] [%d] [%s] \nPrzygotowuje pizze: %d\n", ID, getpid(), timestamp(), pizza_type);
+        diplay_info(ID);
+        printf("C [%d] [%d] [%s]\nPrzygotowuje pizze: %d\n", ID, getpid(), timestamp(), pizza_type);
         sleep(2);
 
         sops_bake->sem_op = -1;
@@ -109,12 +115,14 @@ int main(int argc, char **argv) {
             perror("semop");
             exit(1);
         }
+
         shelf_id = bake_block->next_shelf++;
+        bake_block->next_shelf %= BAKE_SIZE;
         bake_block->bake_shelves[shelf_id] = pizza_type;
         bake_block->pizzas++;
 
-        printf("[%d] [%d] [%s]\n", ID, getpid(), timestamp());
-        printf("Dodalem pizze: %d, liczba pizz w piecu: %d\n", pizza_type, bake_block->pizzas);
+        diplay_info(ID);
+        printf("C [%d] [%d] [%s]\nDodalem pizze: %d, liczba pizz w piecu: %d\n", ID, getpid(), timestamp(), pizza_type, bake_block->pizzas);
         sops_bake->sem_op = 1;
         if (semop(semid, sops_bake, 1) == -1) {
             perror("semop");
@@ -130,8 +138,8 @@ int main(int argc, char **argv) {
         pizza_type = bake_block->bake_shelves[shelf_id];
         bake_block->bake_shelves[shelf_id] = -1;
         bake_block->pizzas--;
-        printf("[%d] [%d] [%s]\n", ID, getpid(), timestamp());
-        printf("Wyjalem pizze: %d, liczba pizz w piecu: %d\n", pizza_type, bake_block->pizzas);
+        diplay_info(ID);
+        printf("C [%d] [%d] [%s]\nWyjalem pizze: %d, liczba pizz w piecu: %d\n", ID, getpid(), timestamp(), pizza_type, bake_block->pizzas);
         sops_bake->sem_op = 1;
         if (semop(semid, sops_bake, 1) == -1) {
             perror("semop");
@@ -144,21 +152,16 @@ int main(int argc, char **argv) {
             exit(1);
         }
         table_block->pizza_boxes[table_block->next_box++] = pizza_type;
+        table_block->next_box %= TABLE_SIZE;
         table_block->pizzas++;
-        printf("[%d] [%d] [%s]\n", ID, getpid(), timestamp());
-        printf("WYkladam na stol: %d, liczba pizz na stole: %d\n", pizza_type, table_block->pizzas);
+
+        diplay_info(ID);
+        printf("C [%d] [%d] [%s]\nWYkladam na stol: %d, liczba pizz na stole: %d\n", ID, getpid(), timestamp(), pizza_type, table_block->pizzas);
         sops_table->sem_op = 1;
         if (semop(semid, sops_table, 1) == -1) {
             perror("semop");
             exit(1);
         }
-
-
-
-        printf("[%d] [%d] [%s]\n", ID, getpid(), timestamp());
-        printf("Dodalem pizze: %d, liczba pizz w piecu: %d\n", pizza_type, bake_block->pizzas);
-
-
 
     }
 

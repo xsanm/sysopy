@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +13,9 @@
 #include <sys/types.h>
 #include <sys/sem.h>
 
+#define min_sleep 100
+#define max_sleep 1000
+
 #define BAKE_FNAME "bake"
 #define TABLE_FNAME "table"
 
@@ -25,6 +29,8 @@
 #define TABLE_SIZE 5
 
 #define BLOCK_SIZE 4096
+
+#define rand_time ((rand() % (max_sleep - min_sleep + 1) + min_sleep) * 1000)
 
 union semun {
     int val;
