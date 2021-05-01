@@ -36,7 +36,7 @@ void remove_mem_block(char *block) {
 char * timestamp(){
     time_t now = time(NULL);
     char * time = asctime(gmtime(&now));
-    time[strlen(time)-1] = '\0';    // Remove \n
+    time[strlen(time)-1] = '\0';
     return time;
 }
 
@@ -67,16 +67,7 @@ int main(int argc, char **argv) {
         puts("ERROR getting block");
     }
 
-    struct sembuf sb;
 
-/*    // nr sem
-    sb.sem_num = 0;
-    // operacja:
-    //  >0 - dodajemy do sem (zwolnienie sem),
-    //  <0 - oczekiwanie az wartosc sem bedzie wieksza lub rowna liczbie ujemnej,
-    //  == 0 czekamy az sem bedzie rowny 0
-    sb.sem_op = -1;
-    sb.sem_flg = 0;*/
 
     key_t key;
     if ((key = ftok(WORKERS_FNAME, WORKERS_ID)) == -1) {
@@ -114,6 +105,20 @@ int main(int argc, char **argv) {
         if (semop(semid, sops_bake, 1) == -1) {
             perror("semop");
             exit(1);
+        }
+
+        while(bake_block->pizzas >= BAKE_SIZE) {
+            sops_bake->sem_op = 1;
+            if (semop(semid, sops_bake, 1) == -1) {
+                perror("semop");
+                exit(1);
+            }
+            sleep(1);
+            sops_bake->sem_op = -1;
+            if (semop(semid, sops_bake, 1) == -1) {
+                perror("semop");
+                exit(1);
+            }
         }
 
         shelf_id = bake_block->next_shelf++;

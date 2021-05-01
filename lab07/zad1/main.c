@@ -1,5 +1,8 @@
 #include "shared.h"
 
+pid_t *workers;
+int N, M;
+
 void create_semaphore() {
     key_t key;
     if ((key = ftok(WORKERS_FNAME, WORKERS_ID)) == -1) {
@@ -20,6 +23,22 @@ void create_semaphore() {
         exit(1);
     }
 }
+
+void destroy_semaphore(){
+    key_t key;
+    if ((key = ftok(WORKERS_FNAME, WORKERS_ID)) == -1) {
+        perror("ftok");
+        exit(1);
+    }
+
+    int semid;
+    if ((semid = semget(key, 2, 0666 | IPC_CREAT)) == -1) {
+        perror("semget");
+        exit(1);
+    }
+    semctl(semid, 0, IPC_RMID, NULL);
+}
+
 
 int create_mem_block() {
     key_t key_b = ftok(BAKE_FNAME, BAKE_ID);
@@ -64,8 +83,8 @@ int get_mem_block(char *fname, int proj_id, int size) {
     return shmget(key, size, 0644);
 }
 
-void destroy_mem_block(char *fname) {
-    int block_id = get_mem_block(fname, WORKERS_ID, BLOCK_SIZE);
+void destroy_mem_block(char *fname, int proj_id, int size) {
+    int block_id = get_mem_block(fname, proj_id, size);
     if(block_id == -1) {
         puts("destoying problem");
         return;
@@ -77,9 +96,12 @@ void destroy_mem_block(char *fname) {
 
 
 void run_pizzeria(int cooks_number, int supplier_number) {
+    workers = malloc(sizeof (pid_t) * (cooks_number + supplier_number));
+
     for (int i = 0; i < cooks_number; i++) {
         usleep(rand_time * 2);
         pid_t child_pid = fork();
+        workers[i] = child_pid;
         char snum[5];
         sprintf(snum, "%d", i + 1);
         if (child_pid == 0) {
@@ -88,8 +110,9 @@ void run_pizzeria(int cooks_number, int supplier_number) {
     }
 
     for (int i = 0; i < supplier_number; i++) {
-        usleep(rand_time);
+        usleep(rand_time * 2);
         pid_t child_pid = fork();
+        workers[cooks_number + i] = child_pid;
         char snum[5];
         sprintf(snum, "%d", i + 1);
         if (child_pid == 0) {
@@ -101,6 +124,15 @@ void run_pizzeria(int cooks_number, int supplier_number) {
     }
 }
 
+void sigint_handler(int signum) {
+    for (int i = 0; i < N + M; i++) {
+        kill(workers[i], SIGINT);
+    }
+    destroy_mem_block(BAKE_FNAME, BAKE_ID, BLOCK_SIZE);
+    destroy_mem_block(TABLE_FNAME, TABLE_ID, BLOCK_SIZE);
+    destroy_semaphore();
+    exit(0);
+}
 
 int main(int argc, char **argv) {
     srand(time(NULL));
@@ -108,16 +140,19 @@ int main(int argc, char **argv) {
         puts("WRONG NUMBER OF ARGUMENTS");
         return 1;
     }
-    int N = strtol (argv[1], NULL, 10);
-    int M = strtol (argv[2], NULL, 10);
+    N = strtol (argv[1], NULL, 10);
+    M = strtol (argv[2], NULL, 10);
     printf("STARTING PIZZERIA with %d cooks and %d suppliers\n", N, M);
+
+    signal(SIGINT, sigint_handler);
 
     create_semaphore();
     create_mem_block();
 
     run_pizzeria(N, M);
-
-    //destroy_mem_block(FNAME);
+    destroy_mem_block(BAKE_FNAME, BAKE_ID, BLOCK_SIZE);
+    destroy_mem_block(TABLE_FNAME, TABLE_ID, BLOCK_SIZE);
+    destroy_semaphore();
 
     return 0;
 }

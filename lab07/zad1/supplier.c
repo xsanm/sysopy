@@ -56,7 +56,6 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    /* klucz, ile semaforow, flagi*/
     int semid;
     if ((semid = semget(key, 2, 0)) == -1) {
         perror("semget");
