@@ -6,12 +6,12 @@ int N, M;
 void create_semaphore() {
     sem_t *bake_sem, *table_sem;
 
-    if ((bake_sem = sem_open(BAKE_SEM, O_RDWR | O_CREAT, 0760, 1)) == - 1){
+    if ((bake_sem = sem_open(BAKE_SEM, O_RDWR | O_CREAT, 0760, 1)) == (void *)- 1){
         perror("shm_open");
         exit(1);
     }
     sem_close(bake_sem);
-    if ((table_sem = sem_open(TABLE_SEM, O_RDWR | O_CREAT, 0760, 1)) == - 1){
+    if ((table_sem = sem_open(TABLE_SEM, O_RDWR | O_CREAT, 0760, 1)) == (void *)- 1){
         perror("shm_open");
         exit(1);
     }
@@ -44,6 +44,13 @@ void create_mem_block() {
         perror("ftruncate");
         exit(1);
     }
+    struct bake *bake_block = mmap(NULL, BLOCK_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd_bake, 0);
+    bake_block->pizzas = 0;
+    bake_block->next_shelf = 0;
+    for(int i = 0; i < BAKE_SIZE; i++) {
+        bake_block->bake_shelves[i] = -1;
+    }
+
     if ((fd_table = shm_open(TABLE_FNAME, O_RDWR | O_CREAT, 0760)) == - 1) {
         perror("shm_open");
         exit(1);
@@ -51,6 +58,13 @@ void create_mem_block() {
     if (ftruncate(fd_table, BLOCK_SIZE) < 0) {
         perror("ftruncate");
         exit(1);
+    }
+    struct table *table_block=  mmap(NULL, BLOCK_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd_table, 0);
+    table_block->pizzas = 0;
+    table_block->box_to_pick = 0;
+    table_block->next_box = 0;
+    for(int i = 0; i < TABLE_SIZE; i++) {
+        table_block->pizza_boxes[i] = -1;
     }
 }
 
@@ -99,9 +113,10 @@ void sigint_handler(int signum) {
     for (int i = 0; i < N + M; i++) {
         kill(workers[i], SIGINT);
     }
-//    destroy_mem_block(BAKE_FNAME, BAKE_ID, BLOCK_SIZE);
-//    destroy_mem_block(TABLE_FNAME, TABLE_ID, BLOCK_SIZE);
-//    destroy_semaphore();
+    sem_unlink(BAKE_SEM);
+    sem_unlink(TABLE_SEM);
+    shm_unlink(TABLE_FNAME);
+    shm_unlink(BAKE_FNAME);
     exit(0);
 }
 

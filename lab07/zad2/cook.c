@@ -1,11 +1,19 @@
 #include "shared.h"
 
+void sigint_handler(int signum) {
+    sem_unlink(BAKE_SEM);
+    sem_unlink(TABLE_SEM);
+    shm_unlink(TABLE_FNAME);
+    shm_unlink(BAKE_FNAME);
+    exit(0);
+}
 
 int main(int argc, char **argv) {
     if(argc != 2) {
         puts("WRONG NUMBER OF ARGUMENTS");
         return 1;
     }
+    signal(SIGINT, sigint_handler);
 
     srand(time(NULL) ^ (getpid()<<16));
 
@@ -74,6 +82,16 @@ int main(int argc, char **argv) {
 
         sem_wait(sem_table);
         struct table *table_block=  mmap(NULL, BLOCK_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd_table, 0);
+        while(table_block->pizzas >= TABLE_SIZE) {
+            munmap(table_block, BLOCK_SIZE);
+            sem_post(sem_table);
+
+            sleep(1);
+
+            sem_wait(sem_table);
+            table_block = mmap(NULL, BLOCK_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd_table, 0);
+        }
+
         table_block->pizza_boxes[table_block->next_box++] = pizza_type;
         table_block->next_box %= TABLE_SIZE;
         table_block->pizzas++;

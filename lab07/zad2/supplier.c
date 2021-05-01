@@ -1,10 +1,18 @@
 #include "shared.h"
 
+void sigint_handler(int signum) {
+    sem_unlink(TABLE_SEM);
+    shm_unlink(TABLE_FNAME);
+    exit(0);
+}
+
 int main(int argc, char **argv) {
     if(argc != 2) {
         puts("WRONG NUMBER OF ARGUMENTS");
         return 1;
     }
+
+    signal(SIGINT, sigint_handler);
 
     int ID = strtol (argv[1], NULL, 10);
     printf("Supplier [%d] hired, PID[%d]\n", ID, getpid());
@@ -20,7 +28,6 @@ int main(int argc, char **argv) {
         perror("shm_open");
         exit(1);
     }
-
 
     while(1) {
         usleep(rand_time);

@@ -30,12 +30,6 @@ sem_t *semaphores[2];
 #define BAKE_FNAME "/bake"
 #define TABLE_FNAME "/table"
 
-#define BAKE_ID 'B'
-#define TABLE_ID 'T'
-
-#define WORKERS_FNAME "main.c"
-#define WORKERS_ID 'W'
-
 #define BAKE_SIZE 5
 #define TABLE_SIZE 5
 
@@ -64,13 +58,6 @@ struct table {
     int box_to_pick;
 };
 
-void lock(int semaphore_id, struct sembuf *sb);
-void unlock(int semaphore_id, struct sembuf *sb);
-
 char * timestamp();
-
-int get_mem_block(char *fname, int proj_id, int size);
-char *add_mem_block(char *fname, int proj_id, int size);
-void remove_mem_block(char *block);
 
 #endif
