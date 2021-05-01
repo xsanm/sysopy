@@ -9,6 +9,6 @@ test:
 	./main 5 5
 
 clean:
-	rm -f bake table
+	rm -f main cook supplier
 
 all: build test clean

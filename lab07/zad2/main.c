@@ -136,9 +136,6 @@ int main(int argc, char **argv) {
     create_mem_block();
 
     run_pizzeria(N, M);
-//    destroy_mem_block(BAKE_FNAME, BAKE_ID, BLOCK_SIZE);
-//    destroy_mem_block(TABLE_FNAME, TABLE_ID, BLOCK_SIZE);
-//    destroy_semaphore();
 
     return 0;
 }
