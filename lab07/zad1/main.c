@@ -70,17 +70,7 @@ int create_mem_block() {
         table_block->pizza_boxes[i] = -1;
     }
 
-
     return 0;
-}
-
-int get_mem_block(char *fname, int proj_id, int size) {
-    key_t key = ftok(fname, proj_id);
-    if(key == -1) {
-        puts("ftok error");
-        exit(1);
-    }
-    return shmget(key, size, 0644);
 }
 
 void destroy_mem_block(char *fname, int proj_id, int size) {

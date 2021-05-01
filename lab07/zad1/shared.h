@@ -1,3 +1,5 @@
+#ifndef SHARED_H
+#define SHARED_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,6 +32,8 @@
 
 #define BLOCK_SIZE 4096
 
+#define rand_number(_min, _max) (rand() %(_max - _min + 1)) + _min
+
 #define rand_time ((rand() % (max_sleep - min_sleep + 1) + min_sleep) * 1000)
 
 union semun {
@@ -50,3 +54,14 @@ struct table {
     int next_box;
     int box_to_pick;
 };
+
+void lock(int semaphore_id, struct sembuf *sb);
+void unlock(int semaphore_id, struct sembuf *sb);
+
+char * timestamp();
+
+int get_mem_block(char *fname, int proj_id, int size);
+char *add_mem_block(char *fname, int proj_id, int size);
+void remove_mem_block(char *block);
+
+#endif

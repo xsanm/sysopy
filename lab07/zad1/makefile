@@ -1,5 +1,14 @@
-run:
-	gcc  -o cook cook.c
-	gcc  -o supplier supplier.c
-	gcc  -o main main.c
-	./main 3 3
+CC=gcc -Wall
+
+build:
+	$(CC) -o cook cook.c shared.c
+	$(CC) -o supplier supplier.c shared.c
+	$(CC) -o main main.c shared.c
+
+test:
+	./main 5 5
+
+clean:
+	rm -f main cook supplier
+
+all: build test clean
