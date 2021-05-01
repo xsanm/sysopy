@@ -1,0 +1,8 @@
+Program dzięki zastosowaniu odpowiednich mechanizmów działa poprawnie.
+
+Dla N, M <= 5 kazdy z procesow trwa +- tyle ile procedura wypiekania pizzy.
+Dla N, M > 5 kazdy z procesow trwa dluzej niz procedura wypiekania pizzy,
+ponieważ procesy muszą czekać aż zwolni się piec lub stół.
+
+Analogicznie sytacja będzie wyglądać gdy N będzie znacząco różne od M.
+(Prawie, bo proces wypiekania trwa krócej niż dostarczania).
