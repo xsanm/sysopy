@@ -13,17 +13,14 @@ struct thread_range {
     int b;
 };
 
-void* make_negative_1(void *arg) {
-    //struct thread_range* data= (struct thread_range*)arg;
+void* number_routine(void *arg) {
     int index = *(int*)arg;
-
 
     int cnt = 0;
     for(int i = 0; i < rows; i++) {
         for(int j = 0; j <= columns; j++) {
             if((cnt++) % threads == index) {
                 matrix_res[i][j] = 255 - matrix[i][j];
-                //printf("%d\n", matrix_res[i][j]);
             }
         }
     }
@@ -31,8 +28,7 @@ void* make_negative_1(void *arg) {
     return NULL;
 }
 
-void* make_negative_2(void *arg) {
-    //struct thread_range* data= (struct thread_range*)arg;
+void* block_routine(void *arg) {
     int k = *(int*)arg;
 
     int a = (k - 1) * ((columns) / threads);
@@ -41,7 +37,7 @@ void* make_negative_2(void *arg) {
     printf("%d %d\n", a, b);
     for(int i = 0; i < rows; i++) {
         for(int j = a; j <= b; j++) {
-                matrix_res[i][j] = 255 - matrix[i][j];
+            matrix_res[i][j] = 255 - matrix[i][j];
         }
     }
     free(arg);
@@ -49,18 +45,21 @@ void* make_negative_2(void *arg) {
 }
 
 
-void numbers_method() {
+void run_method(int mode) {
     pthread_t *th = malloc(sizeof (pthread_t) * threads);
-    //struct thread_range* data = malloc(sizeof (struct thread_range) * threads);
-
-    //int range = 256 / threads;
-
 
     for(int i = 0; i < threads; i++) {
         int* a = malloc(sizeof(int));
-        *a = i;
-        if (pthread_create(&th[i], NULL, &make_negative_1, a) != 0) {
-            perror("Failed to created thread");
+        if(mode == 1) {
+            *a = i;
+            if (pthread_create(&th[i], NULL, &number_routine, a) != 0) {
+                perror("Failed to created thread");
+            }
+        } else if(mode == 2) {
+            *a = i + 1;
+            if (pthread_create(&th[i], NULL, &block_routine, a) != 0) {
+                perror("Failed to created thread");
+            }
         }
     }
     for (int i = 0; i < threads; i++) {
@@ -69,27 +68,6 @@ void numbers_method() {
         }
     }
 }
-
-void block_method() {
-    pthread_t *th = malloc(sizeof (pthread_t) * threads);
-    //struct thread_range* data = malloc(sizeof (struct thread_range) * threads);
-
-    //int range = 256 / threads;
-
-    for(int i = 0; i < threads; i++) {
-        int* a = malloc(sizeof(int));
-        *a = i + 1;
-        if (pthread_create(&th[i], NULL, &make_negative_2, a) != 0) {
-            perror("Failed to created thread");
-        }
-    }
-    for (int i = 0; i < threads; i++) {
-        if (pthread_join(th[i], NULL) != 0) {
-            perror("Failed to join thread");
-        }
-    }
-}
-
 
 int main(int argc, char **argv) {
     if(argc != 5) {
@@ -100,7 +78,6 @@ int main(int argc, char **argv) {
     char *mode = argv[2];
     char *input = argv[3];
     char *output = argv[4];
-
 
 
     FILE *f_in = fopen(input, "rb");
@@ -114,14 +91,10 @@ int main(int argc, char **argv) {
     //read data
     char v[3];
     fgets(v, sizeof(v), f_in);
-
     fscanf(f_in, "%d %d", &columns, &rows);
 
     int gray_val;
     fscanf(f_in, "%d", &gray_val);
-
-
-
 
     matrix = malloc(sizeof (int *) * rows);
     for(int i = 0; i < rows; i++) {
@@ -142,9 +115,9 @@ int main(int argc, char **argv) {
     // do sth
 
     if(strcmp(mode, "numbers") == 0) {
-        numbers_method();
+        run_method(1);
     } else if(strcmp(mode, "block") == 0) {
-        block_method();
+        run_method(2);
     } else {
         puts("Wrong mode");
         return 1;
