@@ -13,13 +13,14 @@ struct thread_range {
     int b;
 };
 
-void* make_negative(void *arg) {
+void* make_negative_1(void *arg) {
     //struct thread_range* data= (struct thread_range*)arg;
     int index = *(int*)arg;
 
+
     int cnt = 0;
     for(int i = 0; i < rows; i++) {
-        for(int j = 0; j < columns; j++) {
+        for(int j = 0; j <= columns; j++) {
             if((cnt++) % threads == index) {
                 matrix_res[i][j] = 255 - matrix[i][j];
                 //printf("%d\n", matrix_res[i][j]);
@@ -27,19 +28,38 @@ void* make_negative(void *arg) {
         }
     }
     free(arg);
+    return NULL;
+}
+
+void* make_negative_2(void *arg) {
+    //struct thread_range* data= (struct thread_range*)arg;
+    int k = *(int*)arg;
+
+    int a = (k - 1) * ((columns) / threads);
+    int b = k * ((columns) / threads) - 1;
+
+    printf("%d %d\n", a, b);
+    for(int i = 0; i < rows; i++) {
+        for(int j = a; j <= b; j++) {
+                matrix_res[i][j] = 255 - matrix[i][j];
+        }
+    }
+    free(arg);
+    return NULL;
 }
 
 
 void numbers_method() {
     pthread_t *th = malloc(sizeof (pthread_t) * threads);
-    struct thread_range* data = malloc(sizeof (struct thread_range) * threads);
+    //struct thread_range* data = malloc(sizeof (struct thread_range) * threads);
 
-    int range = 256 / threads;
+    //int range = 256 / threads;
+
 
     for(int i = 0; i < threads; i++) {
         int* a = malloc(sizeof(int));
         *a = i;
-        if (pthread_create(&th[i], NULL, &make_negative, a) != 0) {
+        if (pthread_create(&th[i], NULL, &make_negative_1, a) != 0) {
             perror("Failed to created thread");
         }
     }
@@ -51,7 +71,23 @@ void numbers_method() {
 }
 
 void block_method() {
+    pthread_t *th = malloc(sizeof (pthread_t) * threads);
+    //struct thread_range* data = malloc(sizeof (struct thread_range) * threads);
 
+    //int range = 256 / threads;
+
+    for(int i = 0; i < threads; i++) {
+        int* a = malloc(sizeof(int));
+        *a = i + 1;
+        if (pthread_create(&th[i], NULL, &make_negative_2, a) != 0) {
+            perror("Failed to created thread");
+        }
+    }
+    for (int i = 0; i < threads; i++) {
+        if (pthread_join(th[i], NULL) != 0) {
+            perror("Failed to join thread");
+        }
+    }
 }
 
 
@@ -127,7 +163,8 @@ int main(int argc, char **argv) {
         fprintf(f_out, "\n");
     }
 
-
+    fclose(f_in);
+    fclose(f_out);
 
     return 0;
 }
