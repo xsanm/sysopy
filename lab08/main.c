@@ -17,21 +17,23 @@ void czas(struct rusage *ru0, struct rusage *ru1){
     double utime = 0, stime = 0, ttime = 0;
     /* Obliczenie czasow. Aby mikrosekundy traktowac jako czesci sekund musimy je wymnozyc przez 10^-6*/
     utime = (double) ru1->ru_utime.tv_sec
-            + 1.e-6 * (double) ru1->ru_utime.tv_usec
+            +  (double) ru1->ru_utime.tv_usec
             - ru0->ru_utime.tv_sec
-            - 1.e-6 * (double) ru0->ru_utime.tv_usec;
+            - (double) ru0->ru_utime.tv_usec;
     stime = (double) ru1->ru_stime.tv_sec
-            + 1.e-6 * (double) ru1->ru_stime.tv_usec
+            + (double) ru1->ru_stime.tv_usec
             - ru0->ru_stime.tv_sec
-            - 1.e-6 * (double) ru0->ru_stime.tv_usec;
+            -  (double) ru0->ru_stime.tv_usec;
     ttime = stime + utime;
 
-    printf("user time: %3f\n", utime);
-    printf("system time: %3f\n", stime);
-    printf("total time: %3f\n", ttime);
+    printf("user time:   \t% 3f [microseconds]\n", utime);
+    printf("system time: \t %3f [microseconds]\n", stime);
+    printf("total time:  \t %3f [microseconds]\n", ttime);
 }
 
 void* number_routine(void *arg) {
+    struct rusage t0, t1;
+    getrusage(RUSAGE_THREAD, &t0);
     int index = *(int*)arg;
 
     int cnt = 0;
@@ -43,10 +45,19 @@ void* number_routine(void *arg) {
         }
     }
     free(arg);
-    return NULL;
+    getrusage(RUSAGE_THREAD, &t1);
+    double *time = malloc(sizeof(double));
+    *time = (double) t1.ru_stime.tv_sec
+            + (double) t1.ru_stime.tv_usec
+            - t0.ru_stime.tv_sec
+            -  (double) t0.ru_stime.tv_usec;
+    pthread_exit((void *)time);
 }
 
 void* block_routine(void *arg) {
+    struct rusage t0, t1;
+    getrusage(RUSAGE_THREAD, &t0);
+
     int k = *(int*)arg;
 
     int a = (k - 1) * ((columns) / threads);
@@ -59,12 +70,23 @@ void* block_routine(void *arg) {
         }
     }
     free(arg);
-    return NULL;
+    getrusage(RUSAGE_THREAD, &t1);
+    double *time = malloc(sizeof(double));
+    *time = (double) t1.ru_stime.tv_sec
+            + (double) t1.ru_stime.tv_usec
+            - t0.ru_stime.tv_sec
+            -  (double) t0.ru_stime.tv_usec;
+    pthread_exit((void *)time);
 }
 
 
 void run_method(int mode) {
     struct rusage t0, t1, t0_self, t1_self;
+    if(mode == 1) {
+        printf("NUMBER METHOD, THREADS [%d]\n", threads);
+    } else {
+        printf("BLOCK METHOD, THREADS [%d]\n", threads);
+    }
 
     getrusage(RUSAGE_SELF, &t0);
     getrusage(RUSAGE_THREAD, &t0_self);
@@ -84,19 +106,18 @@ void run_method(int mode) {
             }
         }
     }
+
     for (int i = 0; i < threads; i++) {
-        if (pthread_join(th[i], NULL) != 0) {
+        double *ttime;
+        if (pthread_join(th[i], (void *)&ttime) != 0) {
             perror("Failed to join thread");
         }
+        printf("Thread: [%d]:\t%lf [microseconds]\n", i + 1, *ttime);
     }
     getrusage(RUSAGE_SELF, &t1);
     getrusage(RUSAGE_THREAD, &t1_self);
 
-    if(mode == 1) {
-        printf("NUMBER METHOD, THREADS [%d]\n", threads);
-    } else {
-        printf("BLOCK METHOD, THREADS [%d]\n", threads);
-    }
+
 
     puts("\nWszystkie zasoby");
     czas(&t0, &t1);

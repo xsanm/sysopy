@@ -1,0 +1,201 @@
+Komentarz do rozwiazania:
+Tworzenie watkow trwa dluzej niz sama operacja edycji obrazu
+Wariant 2 (blokowy) jest szybszy, poniewaz bez wzgledu na wybor metody podzialu pixeli,
+kazdy watek przeglada cala macierz.
+
+
+
+NUMBER METHOD, THREADS [1]
+Thread: [1]:	0.000000 [microseconds]
+
+Wszystkie zasoby
+user time:   	 4260.000000 [microseconds]
+system time: 	 0.000000 [microseconds]
+total time:  	 4260.000000 [microseconds]
+
+Watek glowny
+user time:   	 67.000000 [microseconds]
+system time: 	 0.000000 [microseconds]
+total time:  	 67.000000 [microseconds]
+
+
+BLOCK METHOD, THREADS [1]
+Thread: [1]:	0.000000 [microseconds]
+
+Wszystkie zasoby
+user time:   	 2376.000000 [microseconds]
+system time: 	 0.000000 [microseconds]
+total time:  	 2376.000000 [microseconds]
+
+Watek glowny
+user time:   	 65.000000 [microseconds]
+system time: 	 0.000000 [microseconds]
+total time:  	 65.000000 [microseconds]
+
+
+NUMBER METHOD, THREADS [2]
+Thread: [1]:	0.000000 [microseconds]
+Thread: [2]:	0.000000 [microseconds]
+
+Wszystkie zasoby
+user time:   	 6057.000000 [microseconds]
+system time: 	 0.000000 [microseconds]
+total time:  	 6057.000000 [microseconds]
+
+Watek glowny
+user time:   	 95.000000 [microseconds]
+system time: 	 0.000000 [microseconds]
+total time:  	 95.000000 [microseconds]
+
+
+BLOCK METHOD, THREADS [2]
+Thread: [1]:	0.000000 [microseconds]
+Thread: [2]:	0.000000 [microseconds]
+
+Wszystkie zasoby
+user time:   	 2314.000000 [microseconds]
+system time: 	 290.000000 [microseconds]
+total time:  	 2604.000000 [microseconds]
+
+Watek glowny
+user time:   	 82.000000 [microseconds]
+system time: 	 11.000000 [microseconds]
+total time:  	 93.000000 [microseconds]
+
+
+NUMBER METHOD, THREADS [4]
+Thread: [1]:	0.000000 [microseconds]
+Thread: [2]:	0.000000 [microseconds]
+Thread: [3]:	0.000000 [microseconds]
+Thread: [4]:	0.000000 [microseconds]
+
+Wszystkie zasoby
+user time:   	 18665.000000 [microseconds]
+system time: 	 0.000000 [microseconds]
+total time:  	 18665.000000 [microseconds]
+
+Watek glowny
+user time:   	 117.000000 [microseconds]
+system time: 	 0.000000 [microseconds]
+total time:  	 117.000000 [microseconds]
+
+
+
+BLOCK METHOD, THREADS [4]
+Thread: [1]:	0.000000 [microseconds]
+Thread: [2]:	0.000000 [microseconds]
+Thread: [3]:	0.000000 [microseconds]
+Thread: [4]:	0.000000 [microseconds]
+
+Wszystkie zasoby
+user time:   	 2531.000000 [microseconds]
+system time: 	 316.000000 [microseconds]
+total time:  	 2847.000000 [microseconds]
+
+Watek glowny
+user time:   	 155.000000 [microseconds]
+system time: 	 19.000000 [microseconds]
+total time:  	 174.000000 [microseconds]
+
+
+
+NUMBER METHOD, THREADS [8]
+Thread: [1]:	0.000000 [microseconds]
+Thread: [2]:	0.000000 [microseconds]
+Thread: [3]:	0.000000 [microseconds]
+Thread: [4]:	0.000000 [microseconds]
+Thread: [5]:	0.000000 [microseconds]
+Thread: [6]:	0.000000 [microseconds]
+Thread: [7]:	0.000000 [microseconds]
+Thread: [8]:	0.000000 [microseconds]
+
+Wszystkie zasoby
+user time:   	 42309.000000 [microseconds]
+system time: 	 0.000000 [microseconds]
+total time:  	 42309.000000 [microseconds]
+
+Watek glowny
+user time:   	 312.000000 [microseconds]
+system time: 	 0.000000 [microseconds]
+total time:  	 312.000000 [microseconds]
+
+
+BLOCK METHOD, THREADS [8]
+Thread: [1]:	0.000000 [microseconds]
+Thread: [2]:	0.000000 [microseconds]
+Thread: [3]:	0.000000 [microseconds]
+Thread: [4]:	0.000000 [microseconds]
+Thread: [5]:	0.000000 [microseconds]
+Thread: [6]:	0.000000 [microseconds]
+Thread: [7]:	0.000000 [microseconds]
+Thread: [8]:	0.000000 [microseconds]
+
+Wszystkie zasoby
+user time:   	 4324.000000 [microseconds]
+system time: 	 0.000000 [microseconds]
+total time:  	 4324.000000 [microseconds]
+
+Watek glowny
+user time:   	 346.000000 [microseconds]
+system time: 	 0.000000 [microseconds]
+total time:  	 346.000000 [microseconds]
+
+
+NUMBER METHOD, THREADS [16]
+Thread: [1]:	0.000000 [microseconds]
+Thread: [2]:	0.000000 [microseconds]
+Thread: [3]:	0.000000 [microseconds]
+Thread: [4]:	0.000000 [microseconds]
+Thread: [5]:	0.000000 [microseconds]
+Thread: [6]:	0.000000 [microseconds]
+Thread: [7]:	0.000000 [microseconds]
+Thread: [8]:	0.000000 [microseconds]
+Thread: [9]:	0.000000 [microseconds]
+Thread: [10]:	0.000000 [microseconds]
+Thread: [11]:	0.000000 [microseconds]
+Thread: [12]:	0.000000 [microseconds]
+Thread: [13]:	0.000000 [microseconds]
+Thread: [14]:	0.000000 [microseconds]
+Thread: [15]:	0.000000 [microseconds]
+Thread: [16]:	0.000000 [microseconds]
+
+Wszystkie zasoby
+user time:   	 82838.000000 [microseconds]
+system time: 	 5040.000000 [microseconds]
+total time:  	 87878.000000 [microseconds]
+
+Watek glowny
+user time:   	 0.000000 [microseconds]
+system time: 	 538.000000 [microseconds]
+total time:  	 538.000000 [microseconds]
+
+
+BLOCK METHOD, THREADS [16]
+Thread: [1]:	0.000000 [microseconds]
+Thread: [2]:	0.000000 [microseconds]
+Thread: [3]:	0.000000 [microseconds]
+Thread: [4]:	0.000000 [microseconds]
+Thread: [5]:	0.000000 [microseconds]
+Thread: [6]:	0.000000 [microseconds]
+Thread: [7]:	0.000000 [microseconds]
+Thread: [8]:	0.000000 [microseconds]
+Thread: [9]:	0.000000 [microseconds]
+Thread: [10]:	0.000000 [microseconds]
+Thread: [11]:	0.000000 [microseconds]
+Thread: [12]:	0.000000 [microseconds]
+Thread: [13]:	0.000000 [microseconds]
+Thread: [14]:	0.000000 [microseconds]
+Thread: [15]:	0.000000 [microseconds]
+Thread: [16]:	0.000000 [microseconds]
+
+Wszystkie zasoby
+user time:   	 5092.000000 [microseconds]
+system time: 	 0.000000 [microseconds]
+total time:  	 5092.000000 [microseconds]
+
+Watek glowny
+user time:   	 715.000000 [microseconds]
+system time: 	 0.000000 [microseconds]
+total time:  	 715.000000 [microseconds]
+
+
