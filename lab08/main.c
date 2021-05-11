@@ -1,17 +1,35 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <sys/resource.h>
+#include <sys/time.h>
 
 int **matrix;
 int **matrix_res;
 int rows, columns;
 int threads;
 
-struct thread_range {
-    int a;
-    int b;
-};
+void czas(struct rusage *ru0, struct rusage *ru1){
+
+    double utime = 0, stime = 0, ttime = 0;
+    /* Obliczenie czasow. Aby mikrosekundy traktowac jako czesci sekund musimy je wymnozyc przez 10^-6*/
+    utime = (double) ru1->ru_utime.tv_sec
+            + 1.e-6 * (double) ru1->ru_utime.tv_usec
+            - ru0->ru_utime.tv_sec
+            - 1.e-6 * (double) ru0->ru_utime.tv_usec;
+    stime = (double) ru1->ru_stime.tv_sec
+            + 1.e-6 * (double) ru1->ru_stime.tv_usec
+            - ru0->ru_stime.tv_sec
+            - 1.e-6 * (double) ru0->ru_stime.tv_usec;
+    ttime = stime + utime;
+
+    printf("user time: %3f\n", utime);
+    printf("system time: %3f\n", stime);
+    printf("total time: %3f\n", ttime);
+}
 
 void* number_routine(void *arg) {
     int index = *(int*)arg;
@@ -34,7 +52,7 @@ void* block_routine(void *arg) {
     int a = (k - 1) * ((columns) / threads);
     int b = k * ((columns) / threads) - 1;
 
-    printf("%d %d\n", a, b);
+    //printf("%d %d\n", a, b);
     for(int i = 0; i < rows; i++) {
         for(int j = a; j <= b; j++) {
             matrix_res[i][j] = 255 - matrix[i][j];
@@ -46,6 +64,10 @@ void* block_routine(void *arg) {
 
 
 void run_method(int mode) {
+    struct rusage t0, t1, t0_self, t1_self;
+
+    getrusage(RUSAGE_SELF, &t0);
+    getrusage(RUSAGE_THREAD, &t0_self);
     pthread_t *th = malloc(sizeof (pthread_t) * threads);
 
     for(int i = 0; i < threads; i++) {
@@ -67,9 +89,24 @@ void run_method(int mode) {
             perror("Failed to join thread");
         }
     }
+    getrusage(RUSAGE_SELF, &t1);
+    getrusage(RUSAGE_THREAD, &t1_self);
+
+    if(mode == 1) {
+        printf("NUMBER METHOD, THREADS [%d]\n", threads);
+    } else {
+        printf("BLOCK METHOD, THREADS [%d]\n", threads);
+    }
+
+    puts("\nWszystkie zasoby");
+    czas(&t0, &t1);
+    puts("\nWatek glowny");
+    czas(&t0_self, &t1_self);
+    puts("");
 }
 
 int main(int argc, char **argv) {
+
     if(argc != 5) {
         puts("WRONG NUMBER OF ARGUMENTS");
         return 1;
