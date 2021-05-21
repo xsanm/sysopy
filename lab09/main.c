@@ -2,38 +2,154 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <time.h>
+#include <unistd.h>
 
 #define NO_REINDEERS 9
 #define NO_ELVES 10
 #define NO_ELVES_WAITING 3
 
-#define T_ELF_WORKING rand() % 4 + 2
-#define T_SANTA_SOLVING rand() % 2 + 1
-#define T_REINDEER_HOLIDAY rand() % 6 + 2
-#define T_REINDEER_DELIVERING rand() % 3 + 1
+int CNT = 0;
+
+int elves_q[NO_ELVES]; //elves queue
+int elves_waiting = 0; //number of elves waiting
+
+int reindeer_waiting = 0; //flag
+int reindeer_back = 0; //number of reinders back
+
+pthread_mutex_t mutex_santa = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_reindeer = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_reindeer_delivering = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_elf = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_elf_solving = PTHREAD_MUTEX_INITIALIZER;
+
+pthread_cond_t cond_santa = PTHREAD_COND_INITIALIZER;
+pthread_cond_t cond_reindeer = PTHREAD_COND_INITIALIZER;
+pthread_cond_t cond_reindeer_delivering = PTHREAD_COND_INITIALIZER;
+pthread_cond_t cond_elf = PTHREAD_COND_INITIALIZER;
+pthread_cond_t cond_elf_solving = PTHREAD_COND_INITIALIZER;
+
+void do_work(int a, int b) {
+    srand(time(NULL) ^ (pthread_self()<<16));
+    int work_time = rand() % (b - a + 1) + a;
+    sleep(work_time);
+}
 
 void *santa(void *arg) {
+    while(1 == 1) {
+     pthread_mutex_lock(&mutex_santa);
 
-    return NULL;
+     while (elves_waiting < NO_ELVES_WAITING && reindeer_back < NO_REINDEERS) {
+         printf("Mikolaj: spie, elfy\n");
+         pthread_cond_wait(&cond_santa, &mutex_santa);
+     }
+     pthread_mutex_unlock(&mutex_santa);
+
+     printf("Mikołaj: budze sie\n");
+
+     //reindeers first
+     pthread_mutex_lock(&mutex_reindeer);
+
+     if (reindeer_back == NO_REINDEERS) {
+         CNT++;
+         printf("Mikolaj: dostarczam zabawki [round number: %d]\n", CNT);
+         do_work(2, 4);
+         reindeer_back = 0;
+
+         // notify waiting reindeer that other reindeer are no longer waiting for santa
+         pthread_mutex_lock(&mutex_reindeer_delivering);
+         reindeer_waiting = 0;
+         pthread_cond_broadcast(&cond_reindeer_delivering);
+         pthread_mutex_unlock(&mutex_reindeer_delivering);
+     }
+     pthread_mutex_unlock(&mutex_reindeer);
+
+     if (CNT == 3) exit(0);
+
+     pthread_mutex_lock(&mutex_elf);
+     if (elves_waiting == NO_ELVES_WAITING) {
+         printf("Mikolaj: rozwiazuje problemy elfow [%d][%d][%d]\n", elves_q[0], elves_q[1], elves_q[2]);
+         do_work(1, 2);
+
+
+         pthread_mutex_lock(&mutex_elf_solving);
+         for (int i = 0; i < NO_ELVES; i++) {
+             elves_q[i] = -1;
+         }
+         elves_waiting = 0;
+         pthread_cond_broadcast(&cond_elf_solving);
+         pthread_mutex_unlock(&mutex_elf_solving);
+
+     }
+
+     printf("Mikolaj: zasypiam\n\n");
+     pthread_mutex_unlock(&mutex_elf);
+    }
 }
 
 void* reindeer(void* arg) {
     int id = *((int *) arg);
     printf("Reindeer no [%d] alive\n", id);
 
-    return NULL;
+    while (1 == 1) {
+        pthread_mutex_lock(&mutex_reindeer_delivering);
+        while (reindeer_waiting == 1) {
+            pthread_cond_wait(&cond_reindeer_delivering, &mutex_reindeer_delivering);
+        }
+        pthread_mutex_unlock(&mutex_reindeer_delivering);
+
+        do_work(5, 10);
+
+        pthread_mutex_lock(&mutex_reindeer);
+        reindeer_back++;
+        printf("Renifer: czeka [%d] reniferow na Mikolaja, ID [%d]\n", reindeer_back, id);
+        reindeer_waiting = 1;
+
+        if (reindeer_back == NO_REINDEERS) {
+            printf("Renifer: wybudzam Mikolaja, ID [%d]\n", id);
+            pthread_mutex_lock(&mutex_santa);
+            pthread_cond_broadcast(&cond_santa);
+            pthread_mutex_unlock(&mutex_santa);
+        }
+        pthread_mutex_unlock(&mutex_reindeer);
+    }
 }
 
 void* elf(void* arg) {
     int id = *((int *) arg);
     printf("Elf no [%d] alive\n", id);
 
-    return NULL;
+    while(1 == 1) {
+        do_work(2, 5);
+
+        pthread_mutex_lock(&mutex_elf_solving);
+        while (elves_waiting == NO_ELVES_WAITING) {
+            printf("Elf: czeka na powrot elfow, ID [%d]\n", id);
+            pthread_cond_wait(&cond_elf_solving, &mutex_elf_solving); //elfves waiting for 3 to go back
+        }
+        pthread_mutex_unlock(&mutex_elf_solving);
+
+        pthread_mutex_lock(&mutex_elf);
+        if (elves_waiting < NO_ELVES_WAITING){
+            elves_q[elves_waiting++] = id;
+            printf("Elf: czeka [%d] elfow na Mikolaja, ID [%d]\n", elves_waiting, id);
+
+            if (elves_waiting == NO_ELVES_WAITING){
+                printf("Elf: wybudzam Mikolaja, ID [%d]\n", id);
+                pthread_mutex_lock(&mutex_santa);
+                pthread_cond_broadcast(&cond_santa);
+                pthread_mutex_unlock(&mutex_santa);
+            }
+        }
+        pthread_mutex_unlock(&mutex_elf);
+    }
 }
 
 int main() {
     puts("START");
-    srand(time(NULL));
+
+    for(int i = 0; i < NO_ELVES; i++) {
+        elves_q[i] = -1;
+    }
 
     //starting machine
     pthread_t santa_thread;
