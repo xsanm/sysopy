@@ -1,3 +1,3 @@
 run:
-	gcc -Wall main.c -lpthread
+	gcc -Wall  main.c -lpthread
 	./a.out
