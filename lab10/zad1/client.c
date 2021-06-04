@@ -54,8 +54,6 @@ void register_in_server() {
 }
 
 void display() {
-    //fflush(stdout);
-    int cnt = 1;
     char board[3][3];
     for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) board[i][j] = ' ';
     for (int i = 0; i < m_moves_no; i++) {
@@ -70,8 +68,6 @@ void display() {
         for (int j = 0; j < 3; j++) {
             printf("|%c", board[i][j]);
         }
-        //puts("| | | |");
-
         puts("|");
     }
 }
@@ -89,26 +85,26 @@ void check_game() {
         board[m / 3][m % 3] = o_figure;
     }
     for (int i = 0; i < 3; i++) {
-        if(board[i][0] == board[i][1] && board[i][0] == board[i][2]) {
+        if (board[i][0] == board[i][1] && board[i][0] == board[i][2]) {
             winning = board[i][0];
         }
-        if(board[0][i] == board[1][i] && board[0][i] == board[2][i]) {
+        if (board[0][i] == board[1][i] && board[0][i] == board[2][i]) {
             winning = board[0][i];
         }
     }
     //diagonals
-    if(board[0][0] == board[1][1] && board[0][0] == board[2][2]) {
+    if (board[0][0] == board[1][1] && board[0][0] == board[2][2]) {
         winning = board[0][0];
     }
-    if(board[0][2] == board[1][1] && board[0][2] == board[2][0]) {
+    if (board[0][2] == board[1][1] && board[0][2] == board[2][0]) {
         winning = board[0][2];
     }
-    if(winning != ' ') {
+    if (winning != ' ') {
         puts("I WON");
         send(server_socket, "L", MSG_LEN, 0);
         exit(0);
     }
-    if(m_moves_no + o_moves_no == 9) {
+    if (m_moves_no + o_moves_no == 9) {
         puts("DRAW");
         send(server_socket, "D", MSG_LEN, 0);
         exit(0);
@@ -120,7 +116,6 @@ void make_move() {
     int m;
     scanf("%d", &m);
 
-    //printf("%s\n", buff);
     for (int i = 0; i < m_moves_no; i++) {
         if (m_moves[i] == m) {
             send(server_socket, "W", MSG_LEN, 0);
@@ -145,19 +140,16 @@ void make_move() {
 }
 
 
-
 void server_listen() {
     char msg[MSG_LEN];
-    char buff[MSG_LEN];
-    //recv(server_socket, buff, MSG_LEN, 0);
-    //printf("%s\n", buff);
+
     struct pollfd *sockets = malloc(sizeof(struct pollfd));
     sockets->fd = server_socket;
     sockets->events = POLLIN;
+
     m_moves_no = 0;
     o_moves_no = 0;
 
-    //poll(sockets, 1, -1); //wait inf for clients
     while (1 == 1) {
         poll(sockets, 1, -1);
 
@@ -177,7 +169,6 @@ void server_listen() {
             m_figure = 'X';
             o_figure = 'O';
             printf("My figure %c\n", m_figure);
-
         } else if (strcmp(msg, "O") == 0) {
             m_figure = 'O';
             o_figure = 'X';
@@ -201,12 +192,6 @@ void server_listen() {
         } else {
             printf("%s\n", msg);
         }
-        //printf("%s\n", msg);
-        // printf("Your message: ");
-//        scanf("%s", buff);
-//        printf("%s\n", buff);
-//        send(server_socket, buff, MSG_LEN, 0);
-
     }
 }
 

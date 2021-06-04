@@ -76,18 +76,14 @@ int monitoring_clients() {
     for (int i = 0; i < clients_no + 2; i++) {
         if (sockets[i].revents == POLLIN) {
             int socket = sockets[i].fd;
-            //printf("%d\n", socket);
             if (socket == local_socket || socket == network_socket) {
-
                 return accept(socket, NULL, NULL);
             }
-            //pthread_mutex_unlock(&mutex);
             return socket;
         }
     }
 
     free(sockets);
-    // pthread_mutex_unlock(&mutex);
     return -1;
 }
 
@@ -103,7 +99,6 @@ void remove_dead_clients() {
     }
 }
 
-
 void *ping_clients() {
     while (1 == 1) {
         sleep(8);
@@ -117,7 +112,6 @@ void *ping_clients() {
         }
         pthread_mutex_unlock(&mutex);
     }
-
     return NULL;
 }
 
@@ -129,44 +123,39 @@ void clients_listen() {
         int socket = monitoring_clients();
         char msg[MSG_LEN];
         if (recv(socket, msg, MSG_LEN, 0) <= 0) {
-            //perror("recv ");
             sleep(1);
             continue;
         }
-        //printf("%s\n", msg);
 
         pthread_mutex_lock(&mutex);
         if (strcmp(msg, "P") == 0) {
             for (int i = 0; i < clients_no; i++) {
-
                 if (clients[i].socket == socket) {
-                    //printf("Client [%d] alive\n", i);
                     clients[i].is_alive = 1;
                 }
             }
-        } else if(strlen(msg) == 1 && msg[0] >= '1' && msg[0] <= '9'){
-           int move =  msg[0] - '0';
+        } else if (strlen(msg) == 1 && msg[0] >= '1' && msg[0] <= '9') {
             puts("[MOVE]");
             for (int i = 0; i < clients_no; i++) {
                 if (clients[i].socket == socket) {
-                    if(clients[i].opponentSocket == -1) {
+                    if (clients[i].opponentSocket == -1) {
                         send(socket, "NO", MSG_LEN, 0);
                     } else {
                         send(clients[i].opponentSocket, msg, MSG_LEN, 0);
                     }
                 }
             }
-        } else if(strlen(msg) == 1 && (msg[0] == 'W' || msg[0] == 'L' || msg[0] == 'D')){
+        } else if (strlen(msg) == 1 && (msg[0] == 'W' || msg[0] == 'L' || msg[0] == 'D')) {
             puts("[END]");
             for (int i = 0; i < clients_no; i++) {
                 if (clients[i].socket == socket) {
-                    if(clients[i].opponentSocket == -1) {
+                    if (clients[i].opponentSocket == -1) {
                         clients[i].is_alive = 0;
                     } else {
                         send(clients[i].opponentSocket, msg, MSG_LEN, 0);
                         clients[i].is_alive = 0;
-                        for(int j = 0; j < clients_no; j++) {
-                            if(clients[j].socket == clients[i].opponentSocket) {
+                        for (int j = 0; j < clients_no; j++) {
+                            if (clients[j].socket == clients[i].opponentSocket) {
                                 clients[j].is_alive = 0;
                             }
                         }
@@ -195,6 +184,7 @@ void clients_listen() {
                 clients[clients_no].opponentSocket = -1;
                 clients_no++;
                 printf("[REGISTERED] %s\n", msg);
+
                 //finding oponent
                 int was = 0;
                 for (int i = 0; i < clients_no; i++) {
@@ -210,17 +200,9 @@ void clients_listen() {
                     send(socket, "NO", MSG_LEN, 0);
                 }
             }
-
         }
 
-
         pthread_mutex_unlock(&mutex);
-        //sleep(1);
-        char buff[MSG_LEN];
-        //sprintf(buff, "elo kurwa %s\n", msg);
-        //send(socket, buff, MSG_LEN, 0);
-
-        //TODO check if client oponent is alive
     }
 }
 
@@ -235,19 +217,8 @@ int main(int argc, char **argv) {
 
     printf("SERVER START\n");
 
-
     clients_listen();
 
-//    int client_fd = accept(local_socket, NULL,NULL);
-//    printf("%d\n", client_fd);
-//    int client_fd = accept(network_socket, NULL,NULL);
-//    printf("%d\n", client_fd);
-//
-//    char buff[MSG_LEN];
-//    recv(client_fd, buff, MSG_LEN, 0);
-//    printf("%s\n", buff);
-
-    //sleep(100);
 
     return 0;
 }
