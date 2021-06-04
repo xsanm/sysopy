@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <poll.h>
 
 #define PORT 8082
 #define MAX_CLIENTS 5

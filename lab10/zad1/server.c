@@ -46,6 +46,38 @@ void network_socket_init(char *path) {
     }
 }
 
+int monitoring_clients() {
+    struct pollfd *sockets = malloc(2 * sizeof(struct pollfd));
+    sockets[0].fd = network_socket;
+    sockets[1].fd = local_socket;
+    sockets[0].events = POLLIN;
+    sockets[1].events = POLLIN;
+
+    poll(sockets, 2, -1); //wait inf for clients
+
+    for(int i = 0; i < 2; i++) {
+        if (sockets[i].revents == POLLIN) {
+            int socket = sockets[i].fd;
+            if(socket == local_socket || socket == network_socket) {
+                return accept(socket, NULL, NULL);
+            }
+            return socket;
+        }
+    }
+
+    free(sockets);
+    return -1;
+}
+
+void clients_listen() {
+    while(1 == 1) {
+        int socket = monitoring_clients();
+        char msg[MSG_LEN];
+        recv(socket, msg, MSG_LEN, 0);
+        printf("%s\n", msg);
+    }
+}
+
 int main(int argc, char **argv) {
     if (argc != 3) {
         puts("WRONG NUMBER OF ARGUMENTS");
@@ -57,14 +89,16 @@ int main(int argc, char **argv) {
     printf("SERVER START\n");
 
 
+    clients_listen();
+
 //    int client_fd = accept(local_socket, NULL,NULL);
 //    printf("%d\n", client_fd);
-    int client_fd = accept(network_socket, NULL,NULL);
-    printf("%d\n", client_fd);
-
-    char buff[MSG_LEN];
-    recv(client_fd, buff, MSG_LEN, 0);
-    printf("%s\n", buff);
+//    int client_fd = accept(network_socket, NULL,NULL);
+//    printf("%d\n", client_fd);
+//
+//    char buff[MSG_LEN];
+//    recv(client_fd, buff, MSG_LEN, 0);
+//    printf("%s\n", buff);
 
     //sleep(100);
 
