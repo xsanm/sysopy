@@ -3,6 +3,8 @@
 struct Client {
     char *name;
     int socket;
+    int is_alive;
+    int opponentSocket; //-1 -> no opponent
 };
 
 
@@ -10,6 +12,8 @@ struct Client clients[MAX_CLIENTS];
 int clients_no = 0;
 int local_socket;
 int network_socket;
+
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 void local_socket_init(char *path) {
@@ -60,50 +64,112 @@ int monitoring_clients() {
     sockets[1].fd = local_socket;
     sockets[0].events = POLLIN;
     sockets[1].events = POLLIN;
+
+    pthread_mutex_lock(&mutex);
     for(int i = 2; i < clients_no + 2; i++) {
         sockets[i].fd = clients[i - 2].socket;
         sockets[i].events = POLLIN;
     }
-
+    pthread_mutex_unlock(&mutex);
     poll(sockets, 2 + clients_no, -1); //wait inf for clients
 
     for (int i = 0; i < clients_no + 2; i++) {
         if (sockets[i].revents == POLLIN) {
             int socket = sockets[i].fd;
+            //printf("%d\n", socket);
             if (socket == local_socket || socket == network_socket) {
+
                 return accept(socket, NULL, NULL);
             }
+            //pthread_mutex_unlock(&mutex);
             return socket;
         }
     }
 
     free(sockets);
+   // pthread_mutex_unlock(&mutex);
     return -1;
 }
 
+
+
+void remove_dead_clients() {
+    for(int i = 0; i < clients_no; i++) {
+        if(!clients[i].is_alive) {
+            if(i < clients_no - 1) {
+                clients[i] = clients[clients_no - 1];
+            }
+            clients_no--;
+        }
+    }
+}
+
+
+void *ping_clients() {
+    while(1 == 1) {
+        sleep(5);
+        pthread_mutex_lock(&mutex);
+        printf("[PING]\n");
+        remove_dead_clients();
+        for(int i = 0; i < clients_no; i++) {
+            if(!clients[i].is_alive) continue;
+            send(clients[i].socket, "P", MSG_LEN, 0);
+            clients[i].is_alive = 0; //ping back set to 1
+        }
+        pthread_mutex_unlock(&mutex);
+    }
+
+    return NULL;
+}
+
 void clients_listen() {
+    pthread_t pt;
+    pthread_create(&pt, NULL, ping_clients, NULL);
+
     while (1 == 1) {
         int socket = monitoring_clients();
         char msg[MSG_LEN];
-        recv(socket, msg, MSG_LEN, 0);
-        printf("%s\n", msg);
+        if(recv(socket, msg, MSG_LEN, 0) <= 0) {
+            //perror("recv ");
+            sleep(1);
+            continue;
+        }
+        //printf("%s\n", msg);
 
-        int is_new = 1;
-        for (int i = 0; i < clients_no; i++) {
-            if(clients[i].socket == socket) {
-                is_new = 0;
+        pthread_mutex_lock(&mutex);
+        if(strcmp(msg, "P") == 0) {
+            for(int i = 0; i < clients_no; i++) {
+
+                if(clients[i].socket == socket) {
+                    //printf("Client [%d] alive\n", i);
+                    clients[i].is_alive = 1;
+                }
+            }
+        } else {
+            int is_new = 1;
+            for (int i = 0; i < clients_no; i++) {
+                if(clients[i].socket == socket) {
+                    is_new = 0;
+                }
+            }
+
+            if(is_new == 1) {
+                clients[clients_no].socket = socket;
+                clients[clients_no].name = msg;
+                clients[clients_no].is_alive = 1;
+                clients[clients_no].opponentSocket = -1;
+                clients_no++;
             }
         }
 
-        if(is_new == 1) {
-            clients[clients_no].socket = socket;
-            clients[clients_no].name = msg;
-            clients_no++;
-        }
 
+        pthread_mutex_unlock(&mutex);
+        //sleep(1);
         char buff[MSG_LEN];
-        sprintf(buff, "elo kurwa %s\n", msg);
-        send(socket, buff, MSG_LEN, 0);
+        //sprintf(buff, "elo kurwa %s\n", msg);
+        //send(socket, buff, MSG_LEN, 0);
+
+        //TODO check if client oponent is alive
     }
 }
 
@@ -112,6 +178,7 @@ int main(int argc, char **argv) {
         puts("WRONG NUMBER OF ARGUMENTS");
         return 1;
     }
+    signal(SIGPIPE, SIG_IGN);
     network_socket_init(argv[1]);
     local_socket_init(argv[2]);
 

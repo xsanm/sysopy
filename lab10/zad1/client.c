@@ -52,15 +52,25 @@ void server_listen() {
     char buff[MSG_LEN];
     //recv(server_socket, buff, MSG_LEN, 0);
     //printf("%s\n", buff);
+    struct pollfd *sockets = malloc(sizeof(struct pollfd));
+    sockets -> fd = server_socket;
+    sockets -> events = POLLIN;
+
+    poll(sockets, 1, -1); //wait inf for clients
     while (1 == 1) {
-        int s = recv(server_socket, msg, MSG_LEN, 0);
-        if (s > 0) {
-            printf("%s\n", msg);
-            printf("Your message: ");
-            scanf("%s", buff);
-            printf("%s\n", buff);
-            send(server_socket, buff, MSG_LEN, 0);
+        poll(sockets, 1, -1);
+
+        recv(server_socket, msg, MSG_LEN, 0);
+        if (strcmp(msg, "P") == 0) {
+            puts("Otrzymalem ping");
+            send(server_socket, "P", MSG_LEN, 0);
+            continue;
         }
+        printf("%s\n", msg);
+        printf("Your message: ");
+//        scanf("%s", buff);
+//        printf("%s\n", buff);
+//        send(server_socket, buff, MSG_LEN, 0);
 
     }
 }
