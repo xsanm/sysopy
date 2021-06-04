@@ -4,7 +4,7 @@ char *my_name;
 int server_socket;
 
 void connect_to_server(char *type, char *address) {
-    if(strcmp(type, "local") == 0) {
+    if (strcmp(type, "local") == 0) {
         //connect local socket
 
         if ((server_socket = socket(AF_UNIX, SOCK_STREAM, 0)) <= 0) {
@@ -19,7 +19,7 @@ void connect_to_server(char *type, char *address) {
             exit(1);
         }
 
-    } else if(strcmp(type, "network") == 0) {
+    } else if (strcmp(type, "network") == 0) {
         //connect to network socket
 
         int port = atoi(address);
@@ -30,7 +30,7 @@ void connect_to_server(char *type, char *address) {
         struct sockaddr_in sa;
         sa.sin_family = AF_INET;
         sa.sin_port = htons(port);
-        //sa.sin_addr.s_addr = INADDR_ANY;
+        sa.sin_addr.s_addr = INADDR_ANY;
         if (connect(server_socket, (struct sockaddr *) &sa, sizeof(sa)) < 0) {
             perror("connect network failed");
             exit(1);
@@ -48,17 +48,25 @@ void register_in_server() {
 }
 
 void server_listen() {
+    char msg[MSG_LEN];
     char buff[MSG_LEN];
-    recv(server_socket, buff, MSG_LEN, 0);
-    printf("%s\n", buff);
-//    while(1 == 1) {
-//        recv(server_socket, buff, MSG_LEN, 0);
-//        printf("%s\n", buff);
-//    }
+    //recv(server_socket, buff, MSG_LEN, 0);
+    //printf("%s\n", buff);
+    while (1 == 1) {
+        int s = recv(server_socket, msg, MSG_LEN, 0);
+        if (s > 0) {
+            printf("%s\n", msg);
+            printf("Your message: ");
+            scanf("%s", buff);
+            printf("%s\n", buff);
+            send(server_socket, buff, MSG_LEN, 0);
+        }
+
+    }
 }
 
 int main(int argc, char **argv) {
-    if(argc != 4) {
+    if (argc != 4) {
         puts("WRONG NUMBER OF ARGUMENTS");
         return 1;
     }

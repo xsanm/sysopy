@@ -1,5 +1,13 @@
 #include "shared.h"
 
+struct Client {
+    char *name;
+    int socket;
+};
+
+
+struct Client clients[MAX_CLIENTS];
+int clients_no = 0;
 int local_socket;
 int network_socket;
 
@@ -47,18 +55,22 @@ void network_socket_init(char *path) {
 }
 
 int monitoring_clients() {
-    struct pollfd *sockets = malloc(2 * sizeof(struct pollfd));
+    struct pollfd *sockets = malloc((clients_no + 2) * sizeof(struct pollfd));
     sockets[0].fd = network_socket;
     sockets[1].fd = local_socket;
     sockets[0].events = POLLIN;
     sockets[1].events = POLLIN;
+    for(int i = 2; i < clients_no + 2; i++) {
+        sockets[i].fd = clients[i - 2].socket;
+        sockets[i].events = POLLIN;
+    }
 
-    poll(sockets, 2, -1); //wait inf for clients
+    poll(sockets, 2 + clients_no, -1); //wait inf for clients
 
-    for(int i = 0; i < 2; i++) {
+    for (int i = 0; i < clients_no + 2; i++) {
         if (sockets[i].revents == POLLIN) {
             int socket = sockets[i].fd;
-            if(socket == local_socket || socket == network_socket) {
+            if (socket == local_socket || socket == network_socket) {
                 return accept(socket, NULL, NULL);
             }
             return socket;
@@ -70,11 +82,28 @@ int monitoring_clients() {
 }
 
 void clients_listen() {
-    while(1 == 1) {
+    while (1 == 1) {
         int socket = monitoring_clients();
         char msg[MSG_LEN];
         recv(socket, msg, MSG_LEN, 0);
         printf("%s\n", msg);
+
+        int is_new = 1;
+        for (int i = 0; i < clients_no; i++) {
+            if(clients[i].socket == socket) {
+                is_new = 0;
+            }
+        }
+
+        if(is_new == 1) {
+            clients[clients_no].socket = socket;
+            clients[clients_no].name = msg;
+            clients_no++;
+        }
+
+        char buff[MSG_LEN];
+        sprintf(buff, "elo kurwa %s\n", msg);
+        send(socket, buff, MSG_LEN, 0);
     }
 }
 
