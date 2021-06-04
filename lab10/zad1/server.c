@@ -157,6 +157,7 @@ void clients_listen() {
                 }
             }
 
+            //adding new
             if(is_new == 1) {
                 clients[clients_no].socket = socket;
                 strcpy(clients[clients_no].name, msg);
@@ -165,6 +166,22 @@ void clients_listen() {
                 clients_no++;
                 printf("[REGISTERED] %s\n", msg);
             }
+
+            //finding oponent
+            int was = 0;
+            for (int i = 0; i < clients_no; i++) {
+                if(clients[i].socket != socket && clients[i].opponentSocket == -1) {
+                    was = 1;
+                    clients[i].opponentSocket = socket;
+                    clients[clients_no - 1].opponentSocket = clients[i].socket;
+                    send(socket, "X", MSG_LEN, 0);
+                    send(clients[i].socket, "O", MSG_LEN, 0);
+                }
+            }
+            if(!was) {
+                send(socket, "NO", MSG_LEN, 0);
+            }
+
         }
 
 

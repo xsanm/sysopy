@@ -2,6 +2,8 @@
 
 char *my_name;
 int server_socket;
+char m_figure;
+char o_figure;
 int m_moves[4];
 int o_moves[4];
 int m_moves_no = 0;
@@ -72,9 +74,19 @@ void server_listen() {
         } else if(strcmp(msg, "NT") == 0) {
             puts("Name taken");
             exit(0);
+        } else if(strcmp(msg, "NO") == 0) {
+            puts("NO OPPONENT, waiting ...");
+        } else if(strcmp(msg, "X") == 0) {
+            m_figure = 'X';
+            m_figure = 'O';
+            printf("My figure %c\n", m_figure);
+        } else if(strcmp(msg, "O") == 0) {
+            m_figure = 'O';
+            m_figure = 'X';
+            printf("My figure %c\n", m_figure);
         }
-        printf("%s\n", msg);
-        printf("Your message: ");
+        //printf("%s\n", msg);
+       // printf("Your message: ");
 //        scanf("%s", buff);
 //        printf("%s\n", buff);
 //        send(server_socket, buff, MSG_LEN, 0);
