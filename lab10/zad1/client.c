@@ -76,6 +76,45 @@ void display() {
     }
 }
 
+void check_game() {
+    char winning = ' ';
+    char board[3][3];
+    for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) board[i][j] = ' ';
+    for (int i = 0; i < m_moves_no; i++) {
+        int m = m_moves[i] - 1;
+        board[m / 3][m % 3] = m_figure;
+    }
+    for (int i = 0; i < o_moves_no; i++) {
+        int m = o_moves[i] - 1;
+        board[m / 3][m % 3] = o_figure;
+    }
+    for (int i = 0; i < 3; i++) {
+        if(board[i][0] == board[i][1] && board[i][0] == board[i][2]) {
+            winning = board[i][0];
+        }
+        if(board[0][i] == board[1][i] && board[0][i] == board[2][i]) {
+            winning = board[0][i];
+        }
+    }
+    //diagonals
+    if(board[0][0] == board[1][1] && board[0][0] == board[2][2]) {
+        winning = board[0][0];
+    }
+    if(board[0][2] == board[1][1] && board[0][2] == board[2][0]) {
+        winning = board[0][2];
+    }
+    if(winning != ' ') {
+        puts("I WON");
+        send(server_socket, "L", MSG_LEN, 0);
+        exit(0);
+    }
+    if(m_moves_no + o_moves_no == 9) {
+        puts("DRAW");
+        send(server_socket, "D", MSG_LEN, 0);
+        exit(0);
+    }
+}
+
 void make_move() {
     printf("Your move [square number]: ");
     int m;
@@ -98,11 +137,14 @@ void make_move() {
     }
     m_moves[m_moves_no++] = m;
     display();
+    check_game();
     char buff[MSG_LEN];
     sprintf(buff, "%d", m);
     send(server_socket, buff, MSG_LEN, 0);
     puts("###################");
 }
+
+
 
 void server_listen() {
     char msg[MSG_LEN];
