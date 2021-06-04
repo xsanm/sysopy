@@ -1,4 +1,4 @@
 run:
 	gcc -Wall -g -pthread -o server server.c
 	gcc -Wall -g -pthread -o client client.c
-	./server 8888 socket
+	./server 8889 socket

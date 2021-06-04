@@ -41,6 +41,22 @@ void connect_to_server(char *type, char *address) {
     }
 }
 
+void register_in_server() {
+    char buff[MSG_LEN];
+    sprintf(buff, "%s", my_name);
+    send(server_socket, buff, MSG_LEN, 0);
+}
+
+void server_listen() {
+    char buff[MSG_LEN];
+    recv(server_socket, buff, MSG_LEN, 0);
+    printf("%s\n", buff);
+//    while(1 == 1) {
+//        recv(server_socket, buff, MSG_LEN, 0);
+//        printf("%s\n", buff);
+//    }
+}
+
 int main(int argc, char **argv) {
     if(argc != 4) {
         puts("WRONG NUMBER OF ARGUMENTS");
@@ -51,6 +67,12 @@ int main(int argc, char **argv) {
     printf("CLIENT START\n");
 
     connect_to_server(argv[2], argv[3]);
+
+    printf("CLIENT CONNECTED\n");
+
+    register_in_server();
+
+    server_listen();
 
     return 0;
 }

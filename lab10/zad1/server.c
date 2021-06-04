@@ -56,7 +56,17 @@ int main(int argc, char **argv) {
 
     printf("SERVER START\n");
 
-    sleep(100);
+
+//    int client_fd = accept(local_socket, NULL,NULL);
+//    printf("%d\n", client_fd);
+    int client_fd = accept(network_socket, NULL,NULL);
+    printf("%d\n", client_fd);
+
+    char buff[MSG_LEN];
+    recv(client_fd, buff, MSG_LEN, 0);
+    printf("%s\n", buff);
+
+    //sleep(100);
 
     return 0;
 }

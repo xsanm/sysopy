@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 #include <string.h>
 
-#define PORT 8080
+#define PORT 8082
 #define MAX_CLIENTS 5
+#define MSG_LEN 1024
 
