@@ -2,6 +2,10 @@
 
 char *my_name;
 int server_socket;
+int m_moves[4];
+int o_moves[4];
+int m_moves_no = 0;
+int o_moves_no = 0;
 
 void connect_to_server(char *type, char *address) {
     if (strcmp(type, "local") == 0) {
@@ -65,6 +69,9 @@ void server_listen() {
             puts("Otrzymalem ping");
             send(server_socket, "P", MSG_LEN, 0);
             continue;
+        } else if(strcmp(msg, "NT") == 0) {
+            puts("Name taken");
+            exit(0);
         }
         printf("%s\n", msg);
         printf("Your message: ");

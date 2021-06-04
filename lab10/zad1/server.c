@@ -1,7 +1,7 @@
 #include "shared.h"
 
 struct Client {
-    char *name;
+    char name[32];
     int socket;
     int is_alive;
     int opponentSocket; //-1 -> no opponent
@@ -150,15 +150,20 @@ void clients_listen() {
             for (int i = 0; i < clients_no; i++) {
                 if(clients[i].socket == socket) {
                     is_new = 0;
+                } else if(strcmp(msg, clients[i].name) == 0) {
+                    is_new = 0;
+                    printf("[REGISTERED] failed, name %s taken\n", msg);
+                    send(socket, "NT", MSG_LEN, 0);
                 }
             }
 
             if(is_new == 1) {
                 clients[clients_no].socket = socket;
-                clients[clients_no].name = msg;
+                strcpy(clients[clients_no].name, msg);
                 clients[clients_no].is_alive = 1;
                 clients[clients_no].opponentSocket = -1;
                 clients_no++;
+                printf("[REGISTERED] %s\n", msg);
             }
         }
 
