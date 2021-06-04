@@ -66,7 +66,7 @@ int monitoring_clients() {
     sockets[1].events = POLLIN;
 
     pthread_mutex_lock(&mutex);
-    for(int i = 2; i < clients_no + 2; i++) {
+    for (int i = 2; i < clients_no + 2; i++) {
         sockets[i].fd = clients[i - 2].socket;
         sockets[i].events = POLLIN;
     }
@@ -87,16 +87,15 @@ int monitoring_clients() {
     }
 
     free(sockets);
-   // pthread_mutex_unlock(&mutex);
+    // pthread_mutex_unlock(&mutex);
     return -1;
 }
 
 
-
 void remove_dead_clients() {
-    for(int i = 0; i < clients_no; i++) {
-        if(!clients[i].is_alive) {
-            if(i < clients_no - 1) {
+    for (int i = 0; i < clients_no; i++) {
+        if (!clients[i].is_alive) {
+            if (i < clients_no - 1) {
                 clients[i] = clients[clients_no - 1];
             }
             clients_no--;
@@ -106,13 +105,13 @@ void remove_dead_clients() {
 
 
 void *ping_clients() {
-    while(1 == 1) {
-        sleep(5);
+    while (1 == 1) {
+        sleep(8);
         pthread_mutex_lock(&mutex);
         printf("[PING]\n");
         remove_dead_clients();
-        for(int i = 0; i < clients_no; i++) {
-            if(!clients[i].is_alive) continue;
+        for (int i = 0; i < clients_no; i++) {
+            if (!clients[i].is_alive) continue;
             send(clients[i].socket, "P", MSG_LEN, 0);
             clients[i].is_alive = 0; //ping back set to 1
         }
@@ -129,7 +128,7 @@ void clients_listen() {
     while (1 == 1) {
         int socket = monitoring_clients();
         char msg[MSG_LEN];
-        if(recv(socket, msg, MSG_LEN, 0) <= 0) {
+        if (recv(socket, msg, MSG_LEN, 0) <= 0) {
             //perror("recv ");
             sleep(1);
             continue;
@@ -137,20 +136,51 @@ void clients_listen() {
         //printf("%s\n", msg);
 
         pthread_mutex_lock(&mutex);
-        if(strcmp(msg, "P") == 0) {
-            for(int i = 0; i < clients_no; i++) {
+        if (strcmp(msg, "P") == 0) {
+            for (int i = 0; i < clients_no; i++) {
 
-                if(clients[i].socket == socket) {
+                if (clients[i].socket == socket) {
                     //printf("Client [%d] alive\n", i);
                     clients[i].is_alive = 1;
                 }
             }
+        } else if(strlen(msg) == 1 && msg[0] >= '1' && msg[0] <= '9'){
+           int move =  msg[0] - '0';
+            puts("[MOVE]");
+            for (int i = 0; i < clients_no; i++) {
+                if (clients[i].socket == socket) {
+                    if(clients[i].opponentSocket == -1) {
+                        send(socket, "NO", MSG_LEN, 0);
+                    } else {
+                        send(clients[i].opponentSocket, msg, MSG_LEN, 0);
+                    }
+                }
+            }
+        } else if(strlen(msg) == 1 && (msg[0] == 'W' || msg[0] == 'L' || msg[0] == 'D')){
+            puts("[END]");
+            for (int i = 0; i < clients_no; i++) {
+                if (clients[i].socket == socket) {
+                    if(clients[i].opponentSocket == -1) {
+                        clients[i].is_alive = 0;
+                    } else {
+                        send(clients[i].opponentSocket, msg, MSG_LEN, 0);
+                        clients[i].is_alive = 0;
+                        for(int j = 0; j < clients_no; j++) {
+                            if(clients[j].socket == clients[i].opponentSocket) {
+                                clients[j].is_alive = 0;
+                            }
+                        }
+                    }
+                    remove_dead_clients();
+                }
+            }
         } else {
+            printf("%s\n", msg);
             int is_new = 1;
             for (int i = 0; i < clients_no; i++) {
-                if(clients[i].socket == socket) {
+                if (clients[i].socket == socket) {
                     is_new = 0;
-                } else if(strcmp(msg, clients[i].name) == 0) {
+                } else if (strcmp(msg, clients[i].name) == 0) {
                     is_new = 0;
                     printf("[REGISTERED] failed, name %s taken\n", msg);
                     send(socket, "NT", MSG_LEN, 0);
@@ -158,28 +188,27 @@ void clients_listen() {
             }
 
             //adding new
-            if(is_new == 1) {
+            if (is_new == 1) {
                 clients[clients_no].socket = socket;
                 strcpy(clients[clients_no].name, msg);
                 clients[clients_no].is_alive = 1;
                 clients[clients_no].opponentSocket = -1;
                 clients_no++;
                 printf("[REGISTERED] %s\n", msg);
-            }
-
-            //finding oponent
-            int was = 0;
-            for (int i = 0; i < clients_no; i++) {
-                if(clients[i].socket != socket && clients[i].opponentSocket == -1) {
-                    was = 1;
-                    clients[i].opponentSocket = socket;
-                    clients[clients_no - 1].opponentSocket = clients[i].socket;
-                    send(socket, "X", MSG_LEN, 0);
-                    send(clients[i].socket, "O", MSG_LEN, 0);
+                //finding oponent
+                int was = 0;
+                for (int i = 0; i < clients_no; i++) {
+                    if (clients[i].socket != socket && clients[i].opponentSocket == -1) {
+                        was = 1;
+                        clients[i].opponentSocket = socket;
+                        clients[clients_no - 1].opponentSocket = clients[i].socket;
+                        send(socket, "X", MSG_LEN, 0);
+                        send(clients[i].socket, "O", MSG_LEN, 0);
+                    }
                 }
-            }
-            if(!was) {
-                send(socket, "NO", MSG_LEN, 0);
+                if (!was) {
+                    send(socket, "NO", MSG_LEN, 0);
+                }
             }
 
         }
